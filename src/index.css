@@ -1,0 +1,71 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap'); */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Raleway", sans-serif;
+  font-weight: 300;
+  background-color: black;
+  color: #FFFFFF;
+  background-color: #242424;
+  line-height: normal;
+
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  /*https://stackoverflow.com/questions/4389932/how-do-you-disable-viewport-zooming-on-mobile-safari*/
+  overflow: hidden;
+  background-color: black;
+  color: white;
+  touch-action: pan-y;
+  height: 100%;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+img {
+  pointer-events: none;
+}
+
+/* @media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+} */
+
+
+
+.Clickable {
+  transition-property: color, transform, filter;
+  transition-duration: 0.1s;
+  transition-timing-function: ease;
+}
+
+.Clickable.down {
+  transform: scale(85%);
+  filter: brightness(85%);
+}
