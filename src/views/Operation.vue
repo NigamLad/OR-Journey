@@ -43,12 +43,14 @@ const operationInfo = ref<Operation | null> (null);
 const baseURL = new URL(import.meta.url).origin;
 const loadJson = async() => {
     try {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const response = await fetch(baseURL + '/src/assets/mock-user-data/user-1/516e0881-4012-49ea-a8f8-276d1b424b02.json')
+        // const response = await fetch(baseURL + '/src/assets/mock-user-data/user-1/516e0881-4012-49ea-a8f8-276d1b424b02.json')
+        const response = await fetch(baseURL + '/mock-user-data/user-1/516e0881-4012-49ea-a8f8-276d1b424b02.json')
+        
         // console.log(await response.text())
         console.log(baseURL)
-        console.log(baseURL + '/src/assets/mock-user-data/user-1/516e0881-4012-49ea-a8f8-276d1b424b02.json')
+        console.log(baseURL + '/mock-user-data/user-1/516e0881-4012-49ea-a8f8-276d1b424b02.json')
         const data = await response.json();
         operationInfo.value = data;
         console.log(data)

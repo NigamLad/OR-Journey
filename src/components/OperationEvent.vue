@@ -13,17 +13,13 @@ function toggleCollapse() {
     if(collapsed.value) {
         eventBody.value.classList.add("Collapsed")
         eventElement.value.classList.remove("WithBackground")
-
-        // eventElement.value.style.background = ""
     } else {
         eventBody.value.classList.remove("Collapsed")
         eventElement.value.classList.add("WithBackground")
-        // eventElement.value.style.background = 'radial-gradient(50% 90% at 100% 100%, #2C1C28 0%, rgba(28, 28, 28, 0) 100%), radial-gradient(50% 90% at 0% -1.92%, #172E29 0%, rgba(28, 28, 28, 0) 100%), #1C1C1C'
-
     }
 }
 
-// console.log(props.event)
+console.log()
 
 </script>
 
@@ -43,16 +39,16 @@ function toggleCollapse() {
                 </svg>
             </div>
         </div>
-        <!-- <Transition name="expand">
-            <div id="eventBody" v-if="!collapsed">
-                {{ event.timestamp, event.type }}
-            </div>
-        </Transition> -->
         <div ref="eventBody" id="eventBody" class="Collapsed">
             <div class="overflow-hidden">
-                <p>{{ event.timestamp }}</p>
-                <p>{{ event.type }}</p>
-                <p>{{ event.image }}</p>
+                <div class="px-1 py-2">
+                    <hr>
+                    <p>{{ event.description }}</p>
+                    
+                    <!-- <p>{{ event.type }}</p> -->
+                    <p>{{ event.image }}</p>
+                </div>
+                <p class="float-right">{{ new Date(event.timestamp).getHours() + ":" + new Date(event.timestamp).getMinutes().toString().padStart(2, '0')}}</p>
             </div>
         </div>
         
@@ -107,9 +103,12 @@ function toggleCollapse() {
 }
 
 #eventBody.Collapsed {
-  
   grid-template-rows: 0fr;
-  
+}
+
+hr {
+    margin-bottom: 1em;
+    border-color: #8D9592;
 }
 
 </style>

@@ -1,0 +1,18 @@
+{
+    "id": "516e0881-4012-49ea-a8f8-276d1b424b02",
+    "procedure": "Right Temporal Lobe Meningioma",
+    "duration": 3.75,
+    "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery.",
+    "pathology" : "",
+    "events": [
+        {"eventId": "guid", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure"},
+        {"eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep."},
+        {"eventId": "guid", "timestamp": "2024-01-23T08:00", "type": "Intraoperative", "eventName": "MRI Image", "description": "An MRI image was taken of the right lateral hemisphere"},
+        {"eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "MRI Image - Planning", "description": ""},
+        {"eventId": "guid", "timestamp": "2024-01-23T08:30", "type": "Intraoperative", "eventName": "Surgery started", "description": ""},
+        {"eventId": "guid", "timestamp": "2024-01-23T10:00", "type": "Intraoperative", "eventName": "Wound closing", "description": ""},
+        {"eventId": "guid", "timestamp": "2024-01-23T10:15", "type": "Intraoperative", "eventName": "Surgery complete", "description": ""},
+        {"eventId": "guid", "timestamp": "2024-01-23T11:00", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": ""},
+        {"eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": ""}
+    ]
+}
