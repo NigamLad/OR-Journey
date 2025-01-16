@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/views/Home.vue';
-import Operations from '@/views/Operations.vue';
-import Operation from '@/views/Operation.vue'
-import Planning from '@/views/Planning.vue';
-import Prescriptions from '@/views/Prescriptions.vue';
+// import Home from '@/views/Home.vue';
+// import Operations from '@/views/Operations.vue';
+// import Operation from '@/views/Operation.vue'
+// import Planning from '@/views/Planning.vue';
+// import Prescriptions from '@/views/Prescriptions.vue';
 
 function lazyLoad(view: string){
   return() => import(`@/views/${view}.vue`)
@@ -31,6 +31,10 @@ const routes = [
       component: lazyLoad("Operation"),
       props: true
   },
+  {
+        path: '/gallery',
+        component: lazyLoad("Gallery")
+    },
   {
       path: '/planning',
       component: lazyLoad("Planning")

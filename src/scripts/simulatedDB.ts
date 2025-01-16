@@ -1,0 +1,80 @@
+import type { Operation, User } from "@/types"
+
+export const operations: Record<string, Operation> = {
+    "2fa35c90-4fad-4bc1-886e-cad4cf1f2591": {
+        "id": "2fa35c90-4fad-4bc1-886e-cad4cf1f2591",
+        "procedure": "Right Temporal Lobe Meningioma",
+        "duration": 3.5,
+        "starttime": "2024-01-23T07:30",
+        "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery.",
+        "events": [
+            { "eventId": "guid", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
+            { "eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:00", "type": "Intraoperative", "eventName": "MRI Image", "description": "An MRI image was taken of the right lateral hemisphere", "image": "ff06505d-786e-45d6-b786-519eece0b4ad.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "MRI Image - Planning", "description": "A lesion was located and annotated by that radiology team", "image": "b6b8e905-65eb-4914-bd7b-0d8303e9f87d.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:30", "type": "Intraoperative", "eventName": "Surgery started", "description": "Your surgical procedure started" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:00", "type": "Intraoperative", "eventName": "Video Clip", "description": "The surgical team began the removal of the lesion", "video": "824f032e-e0b3-4dc9-bb8e-9cf3ce77606a.mp4" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:30", "type": "Intraoperative", "eventName": "Video Clip", "description": "The lesion was removed", "video": "3b14e0bf-3603-4cec-b95a-bcba5673ef27.mp4" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:31", "type": "Intraoperative", "eventName": "Image - Tumor", "description": "The tumor removed was approximately 1cm in diameter", "image": "40fa4db6-a7d4-4124-b488-191e294188aa.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:33", "type": "Intraoperative", "eventName": "Wound closing", "description": "Your surgical team has begun closing the wound where they entered" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:45", "type": "Intraoperative", "eventName": "Video Clip", "description": "The skull cap has been replaced", "video": "28f3febc-b15d-4c33-9006-1d628db4b04e.mp4" },
+            { "eventId": "guid", "timestamp": "2024-01-23T10:15", "type": "Intraoperative", "eventName": "Surgery complete", "description": "Your surgical procedure is now complete" },
+            { "eventId": "guid", "timestamp": "2024-01-23T11:00", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": "Anaesthesia drugs have stopped being administered" },
+            { "eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You we're transferred to the post anesthesia care unit" }
+        ]
+    },
+    "41114a51-7413-40f0-ab74-75b903a2392b": {
+        "id": "41114a51-7413-40f0-ab74-75b903a2392b",
+        "procedure": "Right Temporal Lobe Meningioma 2",
+        "duration": 4.5,
+        "starttime": "2024-01-24T07:30",
+        "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery.",
+        "events": [
+            { "eventId": "guid", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
+            { "eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:00", "type": "Intraoperative", "eventName": "MRI Image", "description": "An MRI image was taken of the right lateral hemisphere", "image": "ff06505d-786e-45d6-b786-519eece0b4ad.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "MRI Image - Planning", "description": "A lesion was located and annotated by that radiology team", "image": "b6b8e905-65eb-4914-bd7b-0d8303e9f87d.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:30", "type": "Intraoperative", "eventName": "Surgery started", "description": "Your surgical procedure started" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:00", "type": "Intraoperative", "eventName": "Video Clip", "description": "The surgical team began the removal of the lesion", "video": "824f032e-e0b3-4dc9-bb8e-9cf3ce77606a.mp4" },
+            { "eventId": "guid", "timestamp": "2024-01-23T09:00", "type": "Intraoperative", "eventName": "Video Clip", "description": "The lesion was removed", "video": "3b14e0bf-3603-4cec-b95a-bcba5673ef27.mp4" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "Image - Tumor", "description": "The tumor removed was approximately 1cm in diameter", "image": "40fa4db6-a7d4-4124-b488-191e294188aa.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T10:00", "type": "Intraoperative", "eventName": "Wound closing", "description": "Your surgical has begun closing the wound where they entered" },
+            { "eventId": "guid", "timestamp": "2024-01-23T10:15", "type": "Intraoperative", "eventName": "Surgery complete", "description": "Your surgical procedure is now complete" },
+            { "eventId": "guid", "timestamp": "2024-01-23T11:00", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": "Anaesthesia drugs have stopped being administered" },
+            { "eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You we're transferred to the post anesthesia care unit" }
+        ]
+    },
+    "96e978ad-261d-4134-96bd-21ddc2b815a2": {
+        "id": "96e978ad-261d-4134-96bd-21ddc2b815a2",
+        "procedure": "Left Sub-Occipital Craniectomy for Excision Tumour",
+        "duration": 4.5,
+        "starttime": "2024-01-23T07:00",
+        "description": "You underwent craneictomy, which is a procedure where a part of your skull is removed to relieve pressure on your brain. The pressure can be caused by swelling, bleeding, or too much fluid.",
+        "events": [
+            { "eventId": "guid", "timestamp": "2024-01-23T07:00", "type": "Pre Operative", "eventName": "Arrived at operating room" },
+        ]
+    }
+}
+
+export const users: Record<string, User> = {
+    "516e0881-4012-49ea-a8f8-276d1b424b02": {
+        "id": "516e0881-4012-49ea-a8f8-276d1b424b02",
+        "name": "Mary Jones",
+        "birthdate": "1960-01-01",
+        // "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591"]
+        "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591", "41114a51-7413-40f0-ab74-75b903a2392b"]
+    },
+    "a2b3c4d5-6789-0123-4567-89abcdef0123": {
+        "id": "a2b3c4d5-6789-0123-4567-89abcdef0123",
+        "name": "John Smith",
+        "birthdate": "1975-05-15",
+        "cases": ["96e978ad-261d-4134-96bd-21ddc2b815a2"]
+    },
+    "b3c4d5e6-7890-1234-5678-90abcdef1234": {
+        "id": "b3c4d5e6-7890-1234-5678-90abcdef1234",
+        "name": "Alice Johnson",
+        "birthdate": "1985-10-30",
+        "cases": []
+    }
+}
+

@@ -1,0 +1,14 @@
+{
+    "users": {
+        "5635e7c5-0e7f-4bec-836e-b6afc4b88aea": {
+            "name": "Mary Jones",
+            "cases": [
+                {
+                    "id": "516e0881-4012-49ea-a8f8-276d1b424b02",
+                    "procedure": "Right Temporal Lobe Meningioma",
+                    "starttime": "2024-01-23T07:30"
+                }
+            ]
+        }
+    }
+}

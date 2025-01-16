@@ -24,6 +24,10 @@ watch(address, (newValue) => {
             removeClickHandler(operationsButton.value)
             break;
 
+        case '/gallery':
+            removeClickHandler(operationsButton.value)
+            break;
+
         case '/planning':
             removeClickHandler(planningButton.value)
             break;
@@ -41,8 +45,9 @@ watch(address, (newValue) => {
 
 <template>
     <div id="Navbar" class="flex flex-col antialiased bg-slate-400 text-gray-800 justify-center">
-        <div class="w-full flex justify-evenly items-center">
-            
+        <!-- <div class="w-full flex justify-evenly items-center"> -->
+        <div class="w-full flex justify-around items-center">
+        
             <Router-Link to="/" id="link" class="relative">
                 <Transition name="logo-back-button" mode="out-in">
                     <div class="absolute" v-if="$route.path == '/'">
@@ -65,7 +70,16 @@ watch(address, (newValue) => {
                 </Router-Link>
             </button>
 
-            <button ref="planningButton" class="flex items-center relative">
+            <button ref="galleryButton" @click="" class="flex items-center relative">
+                <Router-Link to="/gallery">
+                    <div class="relative z-10">Gallery</div>
+                    <Transition name="tab-appear">
+                        <NavTab v-if="$route.path == '/gallery'" />
+                    </Transition>
+                </Router-Link>
+            </button>
+
+            <!-- <button ref="planningButton" class="flex items-center relative">
                 <Router-Link to="/planning">
                     <div class="relative z-10">Planning</div>
                     <Transition name="tab-appear">
@@ -81,7 +95,7 @@ watch(address, (newValue) => {
                         <NavTab v-if="$route.path == '/prescriptions'" />
                     </Transition>
                 </Router-Link>
-            </button>
+            </button> -->
 
             <Profile />
 

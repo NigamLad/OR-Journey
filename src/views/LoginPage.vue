@@ -16,8 +16,8 @@ const guestLogin = () => {
         environment: "GUEST",
         tenantId: "",
         username: "",
-        localAccountId: "",
-        name: "Test User",
+        localAccountId: "516e0881-4012-49ea-a8f8-276d1b424b02",
+        name: "Mary Jones",
     }
 }
 

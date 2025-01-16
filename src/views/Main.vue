@@ -4,8 +4,6 @@ import { onMounted, ref } from 'vue';
 import { state } from '@/config/msalConfig';
 import Navbar from './Navbar.vue';
 
-
-
 const container = ref()
 onMounted(async () => {
     setTimeout(() => {

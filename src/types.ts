@@ -1,9 +1,17 @@
 export interface Operation {
-    id: String;
+    id: string;
     procedure: string;
     duration: number;
+    starttime: string;
     description: string;
     events: OperationEvent[];
+}
+
+export interface User {
+    id: string;
+    name: string;
+    birthdate: string;
+    cases: Array<string>;
 }
 
 export interface OperationEvent {
@@ -13,4 +21,5 @@ export interface OperationEvent {
     eventName: string;
     description?: string;
     image?: string;
+    video?: string;
 };

@@ -6,7 +6,7 @@ const props = defineProps({
     id: String,
     message: String,
     duration: String,
-    date: String,
+    date: Date,
 })
 
 onMounted(() => {
@@ -16,11 +16,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <Router-Link :to="'/operation/'+id" class="relative">
+    <Router-Link :to="'/operation/'+ id" class="relative">
 
         <div class="w-full">
             <div id="tab" class="relative">
-                <div id="date" class="absolute z-10" >{{ date }}</div>
+                <div id="date" class="absolute z-10 text-center align-middle whitespace-nowrap" >{{ new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'short', day: '2-digit',}).format(date) }}</div>
                 <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M120 30H0C15 30 15 0 30 0H90C100.714 5.78524e-05 105 30 120 30Z" fill="#232222"/>
                 </svg>
@@ -51,12 +51,13 @@ onMounted(() => {
     }
 
     #date {
-        font-size: 14px;
+        font-size: 13px;
         left:20px;
         height: 100%;
         width:80px;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
 
 </style>
