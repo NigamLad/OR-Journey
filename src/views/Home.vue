@@ -8,8 +8,6 @@ import LoadingComponent from '@/components/LoadingComponent.vue';
 import { users, operations} from "@/scripts/simulatedDB";
 import type { Operation } from "@/types";
 
-console.log(state.user?.localAccountId)
-
 const latestCase = ref<any>(null);
 const baseURL = new URL(import.meta.url).origin;
 const getLatestCase = async () => {

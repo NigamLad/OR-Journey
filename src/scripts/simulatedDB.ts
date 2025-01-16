@@ -61,8 +61,8 @@ export const users: Record<string, User> = {
         "id": "516e0881-4012-49ea-a8f8-276d1b424b02",
         "name": "Mary Jones",
         "birthdate": "1960-01-01",
-        // "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591"]
-        "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591", "41114a51-7413-40f0-ab74-75b903a2392b"]
+        "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591"]
+        // "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591", "41114a51-7413-40f0-ab74-75b903a2392b"]
     },
     "a2b3c4d5-6789-0123-4567-89abcdef0123": {
         "id": "a2b3c4d5-6789-0123-4567-89abcdef0123",

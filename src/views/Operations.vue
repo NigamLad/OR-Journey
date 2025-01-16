@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { state } from "@/config/msalConfig";
 import LoadingComponent from '@/components/LoadingComponent.vue';
-import Card from "../components/Card.vue";
+import Card from "../components/Card.vue";4
 import type { Operation } from "@/types";
 import { users, operations } from "../scripts/simulatedDB";
 
@@ -18,12 +18,7 @@ const loadOperations = async () => {
         var user_operations: Array<Operation> = users[user].cases.map((a: any) => operations[a])
         user_operations.sort((a: any, b: any) => new Date(a.starttime).getTime() - new Date(b.starttime).getTime());
 
-        for (let operation of Object.values(user_operations)) {
-            console.log(operation);
-        }
-
         operationInfo.value = user_operations;
-        console.log(operationInfo.value)
 
     } catch (error) {
         console.log("Failed to load case")
@@ -40,7 +35,7 @@ onMounted(() => {
 <template>
     <div class="relative h-full w-full flex-col overflow-x-hidden touch-pan-y space-y-4 p-4">
         <div v-if="operationInfo" class="w-full flex grid  grid-cols-2 gap-5">
-            <div v-for="operation in operationInfo">
+            <div v-for="operation in operationInfo" :key="operation.id">
                 <Card
                     :id="operation.id"
                     :message="operation.procedure"
