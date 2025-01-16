@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { state } from "@/config/msalConfig";
+import LoadingComponent from '@/components/LoadingComponent.vue';
 import Card from "../components/Card.vue";
 import type { Operation } from "@/types";
 import { users, operations } from "../scripts/simulatedDB";
@@ -40,9 +41,16 @@ onMounted(() => {
     <div class="relative h-full w-full flex-col overflow-x-hidden touch-pan-y space-y-4 p-4">
         <div v-if="operationInfo" class="w-full flex grid  grid-cols-2 gap-5">
             <div v-for="operation in operationInfo">
-                <Card />
+                <Card
+                    :id="operation.id"
+                    :message="operation.procedure"
+                    :duration="`${operation.duration} hours`"
+                    :date="new Date(operation.starttime)" 
+                />
             </div>
-
+        </div>
+        <div v-else class="flex h-full">
+            <LoadingComponent />
         </div>
     </div>
 </template>
