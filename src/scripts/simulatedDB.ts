@@ -10,8 +10,8 @@ export const operations: Record<string, Operation> = {
         "events": [
             { "eventId": "guid", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
             { "eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },
-            { "eventId": "guid", "timestamp": "2024-01-23T08:00", "type": "Intraoperative", "eventName": "MRI Image", "description": "An MRI image was taken of the right lateral hemisphere", "image": "ff06505d-786e-45d6-b786-519eece0b4ad.png" },
-            { "eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "MRI Image - Planning", "description": "A lesion was located and annotated by that radiology team", "image": "b6b8e905-65eb-4914-bd7b-0d8303e9f87d.png" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:00", "type": "Intraoperative", "eventName": "MRI Image", "description": "An MRI image was taken of the right lateral hemisphere", "image": "8ffd8281-ea1e-4ef0-b5dc-77ca17824af0.jpg" },
+            { "eventId": "guid", "timestamp": "2024-01-23T08:15", "type": "Intraoperative", "eventName": "MRI Image - Planning", "description": "A lesion was located and annotated by that radiology team", "image": "710e6d1e-d729-4fe6-9adb-dabf725a394a.jpg" },
             { "eventId": "guid", "timestamp": "2024-01-23T08:30", "type": "Intraoperative", "eventName": "Surgery started", "description": "Your surgical procedure started" },
             { "eventId": "guid", "timestamp": "2024-01-23T09:00", "type": "Intraoperative", "eventName": "Video Clip", "description": "The surgical team began the removal of the lesion", "video": "824f032e-e0b3-4dc9-bb8e-9cf3ce77606a.mp4" },
             { "eventId": "guid", "timestamp": "2024-01-23T09:30", "type": "Intraoperative", "eventName": "Video Clip", "description": "The lesion was removed", "video": "3b14e0bf-3603-4cec-b95a-bcba5673ef27.mp4" },
@@ -19,6 +19,7 @@ export const operations: Record<string, Operation> = {
             { "eventId": "guid", "timestamp": "2024-01-23T09:33", "type": "Intraoperative", "eventName": "Wound closing", "description": "Your surgical team has begun closing the wound where they entered" },
             { "eventId": "guid", "timestamp": "2024-01-23T09:45", "type": "Intraoperative", "eventName": "Video Clip", "description": "The skull cap has been replaced", "video": "28f3febc-b15d-4c33-9006-1d628db4b04e.mp4" },
             { "eventId": "guid", "timestamp": "2024-01-23T10:15", "type": "Intraoperative", "eventName": "Surgery complete", "description": "Your surgical procedure is now complete" },
+            { "eventId": "guid", "timestamp": "2024-01-23T10:45", "type": "Post Operative", "eventName": "MRI Image - Post Op", "description": "An MRI image was taken of the right lateral hemisphere after the surgical operation", "image": "30702c96-3c7f-46de-a134-10f0278db2e0.jpg" },
             { "eventId": "guid", "timestamp": "2024-01-23T11:00", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": "Anaesthesia drugs have stopped being administered" },
             { "eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You we're transferred to the post anesthesia care unit" }
         ]
@@ -61,8 +62,8 @@ export const users: Record<string, User> = {
         "id": "516e0881-4012-49ea-a8f8-276d1b424b02",
         "name": "Mary Jones",
         "birthdate": "1960-01-01",
-        "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591"]
-        // "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591", "41114a51-7413-40f0-ab74-75b903a2392b"]
+        // "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591"]
+        "cases": ["2fa35c90-4fad-4bc1-886e-cad4cf1f2591", "41114a51-7413-40f0-ab74-75b903a2392b"]
     },
     "a2b3c4d5-6789-0123-4567-89abcdef0123": {
         "id": "a2b3c4d5-6789-0123-4567-89abcdef0123",

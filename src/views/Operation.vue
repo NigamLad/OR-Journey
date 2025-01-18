@@ -26,7 +26,6 @@ onMounted(() => {
     loadOperation();
 });
 
-
 </script>
 
 <template>
@@ -39,7 +38,6 @@ onMounted(() => {
             <p class="mb-6">{{ operationInfo.description }}</p>
             <div v-for="event in operationInfo.events">
                 <OperationEvent :event="event" />
-                <!-- {{ event.eventName }} -->
             </div>
         </div>
         <div v-else class="flex h-full">

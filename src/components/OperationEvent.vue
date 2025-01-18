@@ -25,7 +25,7 @@ function toggleCollapse() {
 
     <div id="event" ref="eventElement" @click="toggleCollapse" class="p-2 mb-3 text-xl">
         <div id="eventHeader" class="flex justify-between items-center">
-            <div id="eventName" class="whitespace-nowrap overflow-hidden">{{ event.eventName }}</div>
+            <div id="eventName" class="overflow-hidden pr-4">{{ event.eventName }}</div>
             <div id="collapseButton" class="relative">
                 <svg v-if="collapsed" width="20" height="20" viewBox="0 0 20 20" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -56,7 +56,7 @@ function toggleCollapse() {
                         <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
                             Graphic Content
                             <br>
-                            Click to Show  
+                            Click to Show
                         </div>
                         <video controls muted>
                             <source :src="'/videos/' + event.video">
@@ -111,9 +111,9 @@ function toggleCollapse() {
 #collapseButton:before {
     content: '';
     position: absolute;
-    width: 30px;
+    width: 16px;
     height: calc(100% + 2px);
-    left: -30px;
+    left: -16px;
     background: linear-gradient(to right, rgba(28, 28, 28, 0) 0%, rgba(28, 28, 28, 1) 50%);
 
 }

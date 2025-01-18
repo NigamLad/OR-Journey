@@ -17,7 +17,6 @@ onMounted(() => {
 
 <template>
     <Router-Link :to="'/operation/'+ id" class="relative">
-
         <div class="w-full">
             <div id="tab" class="relative">
                 <div id="date" class="absolute z-10 text-center align-middle whitespace-nowrap" >{{ new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'short', day: '2-digit',}).format(date) }}</div>
