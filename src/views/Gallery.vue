@@ -46,7 +46,7 @@ onMounted(() => {
                         :class="{ 'col-span-2': event.hasOwnProperty('video') }">
                         <div v-if="event.hasOwnProperty('image')" class="p-2">
                             <figure>
-                                <img :src="baseURL + '/images/' + event.image">
+                                <img :src="event.image">
                                 <figcaption>{{ event.description }}</figcaption>
                             </figure>
                         </div>
