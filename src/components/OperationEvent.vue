@@ -51,7 +51,7 @@ function toggleCollapse() {
                 <div class="px-1 py-2">
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
-                    <img v-if="event.image" :src="baseURL + '/images/' + event.image">
+                    <img v-if="event.image" :src="event.image">
                     <div v-if="event.video" class="relative">
                         <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
                             Graphic Content
@@ -59,7 +59,7 @@ function toggleCollapse() {
                             Click to Show
                         </div>
                         <video controls muted>
-                            <source :src="'/videos/' + event.video">
+                            <source :src="event.video">
                         </video>
                     </div>
                 </div>

@@ -58,7 +58,7 @@ onMounted(() => {
                                 Click to Show
                             </div>
                             <video controls muted>
-                                <source :src="'/videos/' + event.video">
+                                <source :src="event.video">
                             </video>
                             <div>{{ event.description }}</div>
                         </div>
