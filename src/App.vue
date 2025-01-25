@@ -11,9 +11,6 @@ import type { AccountInfo } from '@azure/msal-browser';
 
 const initialize = async () => {
 
-    console.log("INIT STATE:", state.user)
-
-
     try {
         await msalInstance.initialize()
         registerAuthorizationHeaderInterceptor() // Call the initialize function
