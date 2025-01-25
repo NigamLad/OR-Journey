@@ -50,7 +50,7 @@ onMounted(() => {
                                 <figcaption>{{ event.description }}</figcaption>
                             </figure>
                         </div>
-                        <div v-else-if="event.hasOwnProperty('video')" class="p-2 relative">
+                        <div v-else-if="event.hasOwnProperty('video')" class="flex flex-col items-center p-2 relative">
                             <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default"
                                 @click.self="(e) => { (e.target as HTMLElement)?.classList.add('hidden') }">
                                 Graphic Content

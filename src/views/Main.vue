@@ -6,6 +6,7 @@ import Navbar from './Navbar.vue';
 
 const container = ref()
 onMounted(async () => {
+
     setTimeout(() => {
         container.value.classList.add("fadeIn")
     }, 500)

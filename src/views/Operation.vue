@@ -3,7 +3,11 @@ import { ref, computed, onMounted } from 'vue';
 import OperationEvent from '../components/OperationEvent.vue';
 import type { Operation } from '@/types';
 import LoadingComponent from '@/components/LoadingComponent.vue';
-import { operations } from '@/scripts/simulatedDB';
+import { operations, users } from '@/scripts/simulatedDB';
+import { state } from '@/config/msalConfig';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
     id: {type: String, required: true}
@@ -23,6 +27,18 @@ const loadOperation = async () => {
 }
 
 onMounted(() => {
+    // Check if the reuqested operation belongs to the user
+    console.log(state.user?.localAccountId)
+    
+    const userCases = users[state.user?.localAccountId as string].cases;
+    console.log(userCases)
+
+    // Check if the requested operation is in the user's cases
+    if (!userCases.includes(props.id)) {
+        console.log("Operation not found in user's cases")
+        router.push({path: '/'})
+    }
+
     loadOperation();
 });
 

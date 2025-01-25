@@ -35,7 +35,7 @@ onMounted(() => {
 <template>
     <div class="relative h-full w-full flex-col overflow-x-hidden touch-pan-y space-y-4 p-4">
         <div v-if="operationInfo" class="w-full flex grid  grid-cols-2 gap-5">
-            <div v-for="operation in operationInfo" :key="operation.id">
+            <div class="flex" v-for="operation in operationInfo" :key="operation.id">
                 <Card
                     :id="operation.id"
                     :message="operation.procedure"

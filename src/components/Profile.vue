@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { state } from '../config/msalConfig'
 import { msalService } from '../config/useAuth'
+import { replaceHash } from 'node_modules/@azure/msal-browser/dist/utils/BrowserUtils';
 const { logout } = msalService()
 
 const account = {firstname: state.user?.name?.split(" ")[0], lastname: state.user?.name?.split(" ")[1]} as any
@@ -9,8 +10,11 @@ const account = {firstname: state.user?.name?.split(" ")[0], lastname: state.use
 function handleLogout() {
     if(state.user?.environment == "GUEST")
         state.isAuthenticated = false
-    else
+    else{
+        state.user = null
+        state.isAuthenticated = false
         logout()
+    }
 }
 
 const menu = ref()
@@ -31,7 +35,7 @@ onMounted(() => {
 <template>
     <div class="">
         <div>
-            <button @click="toggleMenu">{{ account.firstname[0] + account.lastname[0] }}</button>
+            <button class="aspect-square" @click="toggleMenu">{{ account.firstname[0] + account.lastname[0] }}</button>
         </div>
         <div ref="menu" id="menu" class="collapsed">
             <div>{{ account.firstname + " " + account.lastname }}</div>

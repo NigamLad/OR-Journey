@@ -4,20 +4,21 @@ import { msalService } from '../config/useAuth'
 import { initClickHandler } from "../scripts/clickAnimation";
 import { state } from '@/config/msalConfig';
 const { login } = msalService()
+import { users } from '@/scripts/simulatedDB';
 
 const handleLogin = async () => {
     await login()
 }
 
-const guestLogin = () => {
+function guestLogin(id: string) {
     state.isAuthenticated = true
     state.user = {
         homeAccountId: "",
         environment: "GUEST",
         tenantId: "",
         username: "",
-        localAccountId: "516e0881-4012-49ea-a8f8-276d1b424b02",
-        name: "Mary Jones",
+        localAccountId: id,
+        name: users[id].name,
     }
 }
 
@@ -33,8 +34,6 @@ onMounted(() => {
     initClickHandler(guestLoginButton.value)
 })
 
-
-
 </script>
 
 <template>
@@ -44,9 +43,30 @@ onMounted(() => {
             <div class="text-5xl pt-5 font-extralight">OR Journey</div>
         </div>
 
-        <div class="flex flex-col items-center">
-            <button class="mb-5" ref="loginButton" @click="handleLogin">Log In</button>
-            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin">Guest</button>
+        <div class="flex flex-col items-center gap-4">
+            <p class="text-center w-[250px]">
+                Explore what a patient could view after a surgical intervention.
+                <br><br>
+                Select a user below:
+                <br>
+                <br>
+
+            </p>
+
+            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin('516e0881-4012-49ea-a8f8-276d1b424b02')">
+                Mary Jones
+            </button>
+
+            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin('a2b3c4d5-6789-0123-4567-89abcdef0123')">
+                John Smith
+            </button>
+
+            <!-- <button class="mb-5" ref="loginButton" @click="handleLogin">
+                Log In
+            </button>
+            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin">
+                Guest
+            </button> -->
         </div>
 
     </div>
