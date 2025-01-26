@@ -27,13 +27,8 @@ const loadOperation = async () => {
 }
 
 onMounted(() => {
-    // Check if the reuqested operation belongs to the user
-    console.log(state.user?.localAccountId)
-    
-    const userCases = users[state.user?.localAccountId as string].cases;
-    console.log(userCases)
-
     // Check if the requested operation is in the user's cases
+    const userCases = users[state.user?.localAccountId as string].cases;
     if (!userCases.includes(props.id)) {
         console.log("Operation not found in user's cases")
         router.push({path: '/'})
@@ -59,8 +54,6 @@ onMounted(() => {
         <div v-else class="flex h-full">
             <LoadingComponent />
         </div>
-
-
     </div>
 </template>
 
