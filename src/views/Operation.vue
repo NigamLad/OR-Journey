@@ -7,8 +7,6 @@ import { operations, users } from '@/scripts/simulatedDB';
 import { state } from '@/config/msalConfig';
 import { useRouter } from 'vue-router';
 import Card from '@/components/Card.vue';
-import HoverInfo from '@/components/HoverInfo.vue';
-import ArrowUpShort from '@/components/icons/arrow-up-short.vue';
 
 const router = useRouter();
 

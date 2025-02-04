@@ -43,6 +43,7 @@ onMounted(() => {
                 <br>
                 <div class="grid grid-cols-2">
                     <div v-for="event in operation.events.filter((e: Object) => (e.hasOwnProperty('image') || e.hasOwnProperty('video')))"
+                        class="m-2 p-2 border-white border rounded-lg"
                         :class="{ 'col-span-2': event.hasOwnProperty('video') }">
                         <div v-if="event.hasOwnProperty('image')" class="p-2">
                             <figure>

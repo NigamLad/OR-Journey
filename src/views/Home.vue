@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import Card from "../components/FolderCard.vue";
 import MoreCard from "../components/MoreCard.vue";
-import { watch, computed, onMounted, ref } from "vue";
-import type { AccountInfo } from "@azure/msal-browser";
+import { onMounted, ref } from "vue";
 import { state } from "@/config/msalConfig";
 import LoadingComponent from '@/components/LoadingComponent.vue';
 import { users, operations } from "@/scripts/simulatedDB";
