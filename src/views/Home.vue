@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Card from "../components/Card.vue";
+import Card from "../components/FolderCard.vue";
 import MoreCard from "../components/MoreCard.vue";
 import { watch, computed, onMounted, ref } from "vue";
 import type { AccountInfo } from "@azure/msal-browser";

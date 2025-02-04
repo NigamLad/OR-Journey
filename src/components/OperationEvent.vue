@@ -51,17 +51,24 @@ function toggleCollapse() {
                 <div class="px-1 py-2">
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
-                    <img v-if="event.image" :src="event.image">
-                    <div v-if="event.video" class="relative">
-                        <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
-                            Graphic Content
-                            <br>
-                            Click to Show
+                    <img class="border-white border-2 rounded-lg" v-if="event.image" :src="event.image">
+                    <div v-if="event.video" class=" flex flex-col">
+                        <div class="relative h-full">
+                            <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
+                                Graphic Content
+                                <br>
+                                Click to Show
+                            </div>
+                            <video class="border-white border-2 rounded-lg" controls muted>
+                                <source :src="event.video">
+                            </video>
                         </div>
-                        <video controls muted>
-                            <source :src="event.video">
-                        </video>
+                        <div class="flex pt-4 items-center gap-1">
+                            <img class="object-scale-down" height="40px" width="40px" src="/src/assets/smartforceps.png">
+                            <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }}</p>
+                        </div>
                     </div>
+                    
                 </div>
                 <p class="float-right">
                     {{
@@ -133,11 +140,9 @@ hr {
     border-color: #8D9592;
 }
 
-img, video {
-    border: 2px solid white;
-    border-radius: 10px;
+/* img, video {
     width: 75%;
     margin:auto;
-}
+} */
 
 </style>

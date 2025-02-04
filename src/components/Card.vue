@@ -1,39 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue'
-import { initClickHandler } from "../scripts/clickAnimation";
-
-const props = defineProps({
-    id: String,
-    message: String,
-    duration: String,
-    date: Date,
-})
-
-onMounted(() => {
-    initClickHandler(getCurrentInstance()?.vnode.el)
-})
 
 </script>
 
 <template>
-    <Router-Link :to="'/operation/' + id" class="relative">
-        <div class="w-full">
-            <div id="tab" class="relative">
-                <div id="date" class="absolute z-10 text-center align-middle whitespace-nowrap">{{ new
-                    Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit', }).format(date) }}
-                </div>
-                <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M120 30H0C15 30 15 0 30 0H90C100.714 5.78524e-05 105 30 120 30Z" fill="#232222" />
-                </svg>
-            </div>
-
-            <div id="card" class="relative w-1/2">
-                <p>{{ message }}</p>
-                <p class="absolute bottom-3">{{ duration }}</p>
-            </div>
+    <div id="card" class="flex flex-col w-full h-full">
+        <div class="">
+            <slot name="title"></slot>
         </div>
-    </Router-Link>
-
+        <div class="h-full">
+            <slot name="content"></slot>
+        </div>
+    </div>
 </template>
 
 <style scoped>
@@ -47,21 +24,6 @@ onMounted(() => {
         , #1C1C1C;
     min-width: 140px;
     width: 100%;
-    height: 130px;
-}
-
-#tab {
-    fill: #232222;
-    transform: translate(10px);
-}
-
-#date {
-    font-size: 13px;
-    left: 20px;
-    height: 100%;
-    width: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 140px;
 }
 </style>

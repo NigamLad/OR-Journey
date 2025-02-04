@@ -22,4 +22,5 @@ export interface OperationEvent {
     description?: string;
     image?: string;
     video?: string;
+    forceaverage?: number;
 };
