@@ -22,6 +22,7 @@ export default defineConfig({
           short_name: 'Journey',
           description: "Experience the operation you didn't see",
           theme_color: '#000000',
+          background_color: '#000000',
           icons: [
             {
               src: "/src/assets/Journey Logo White.svg",
