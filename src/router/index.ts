@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { state } from '@/config/msalConfig';
-import { users } from '@/scripts/simulatedDB';
 
 function lazyLoad(view: string) {
     return () => import(`@/views/${view}.vue`)

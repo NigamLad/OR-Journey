@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterView } from 'vue-router'
 import { msalService } from './config/useAuth'
 import { msalInstance, state } from './config/msalConfig'
 const { handleRedirect, registerAuthorizationHeaderInterceptor } = msalService()
-import Navbar from './views/Navbar.vue';
 import Main from './views/Main.vue';
 import LoginPage from './views/LoginPage.vue';
-import type { AccountInfo } from '@azure/msal-browser';
+// import type { AccountInfo } from '@azure/msal-browser';
 
 const initialize = async () => {
 
