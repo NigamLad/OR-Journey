@@ -65,7 +65,7 @@ function toggleCollapse() {
                         </div>
                         <div class="flex pt-4 items-center gap-1">
                             <img class="object-scale-down" height="40px" width="40px" src="/src/assets/smartforceps.png">
-                            <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }}</p>
+                            <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }} N</p>
                         </div>
                     </div>
                     
