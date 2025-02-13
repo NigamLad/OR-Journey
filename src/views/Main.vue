@@ -15,7 +15,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div id="container" ref="container" class="flex flex-row flex-col h-full w-full">
+    <div id="container" ref="container" class="flex flex-col h-full w-full">
         <Navbar />
         <div id="spacer" class="w-full"></div>
         <RouterView v-slot="{ Component }">

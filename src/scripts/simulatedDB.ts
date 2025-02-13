@@ -3,10 +3,10 @@ import type { Operation, User } from "@/types"
 export const operations: Record<string, Operation> = {
     "2fa35c90-4fad-4bc1-886e-cad4cf1f2591": {
         "id": "2fa35c90-4fad-4bc1-886e-cad4cf1f2591",
-        "procedure": "Right Temporal Lobe Meningioma",
+        "procedure": "Right Temporal Lobe Meningioma Surgical Resection of Right Motor Strip Tumor",
         "duration": 3.5,
         "starttime": "2024-01-23T07:30",
-        "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery.",
+        "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A lesion in the motor strip can cause weakness or paralysis on the body.",
         "events": [
             { "eventId": "guid", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
             { "eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },
@@ -26,10 +26,10 @@ export const operations: Record<string, Operation> = {
     },
     "96e978ad-261d-4134-96bd-21ddc2b815a2": {
         "id": "96e978ad-261d-4134-96bd-21ddc2b815a2",
-        "procedure": "Right Frontal Craniotomy for Ressection of Meningioma Tumour",
+        "procedure": "Right Frontal Craniotomy for Resection of Parafalcine Meningioma Tumour",
         "duration": 5.5,
         "starttime": "2024-01-25T07:00",
-        "description": "You underwent craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery.",
+        "description": "You underwent craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A parafalcine meningioma is a tumor that grows between the brain's two hemispheres. Although typically benign, it can cause seizures, headaches, and other symptoms.",
         "events": [
             { "eventId": "guid", "timestamp": "2024-01-23T07:00", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
             { "eventId": "guid", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },

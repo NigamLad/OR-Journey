@@ -25,7 +25,58 @@ export default defineConfig({
           background_color: '#000000',
           icons: [
             {
-              src: "/src/assets/Journey Logo White.svg",
+              "purpose": "maskable",
+              "sizes": "1024x1024",
+              "src": "/icons/Journey Logo White.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "48x48",
+              "src": "/icons/Journey Logo White_x48.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "72x72",
+              "src": "/icons/Journey Logo White_x72.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "96x96",
+              "src": "/icons/Journey Logo White_x96.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "128x128",
+              "src": "/icons/Journey Logo White_x128.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "any",
+              "sizes": "144x144",
+              "src": "/icons/Journey Logo White_x144.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "192x192",
+              "src": "/icons/Journey Logo White_x192.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "384x384",
+              "src": "/icons/Journey Logo White_x384.png",
+              "type": "image/png"
+            },
+            {
+              "purpose": "maskable",
+              "sizes": "512x512",
+              "src": "/icons/Journey Logo White_x512.png",
+              "type": "image/png"
             }
           ],
           workbox: {
