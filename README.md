@@ -1,33 +1,43 @@
 # OR Journey
 
-This template should help get you started developing with Vue 3 in Vite.
+OR Journey is a web app that presents information about a patient's surgical intervention. This app is meant to demonstrate what a future application could look like to present intraoperative data to a patient. 
 
-## Recommended IDE Setup
+The information presented includes:
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Operating Room Patient Charting Information
+- Diagnostic Medical Imaging
+- Surgical Field Microscope Video Clips
+- SmartForceps Analytics
 
-## Type Support for `.vue` Imports in TS
+*The information shown in this app is meant for demonstration purposes only and does not represent real person's surgical procedures. Images and videos have been sourced online are anonymized and do not hold any copyrights. Sources will be listed below.*
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+## Features
+- VueJS - Vue 3 web framework for ease of development of design and functionality
+- TailwindCSS - Tailwind styling framework for ease of development of styling and mobile first design
+- VitePWA - Progressive Web App can be installed on mobile devices for an app-like experience
 
 ## Project Setup
 
+### Installation
 ```sh
 npm install
 ```
 
 ### Compile and Hot-Reload for Development
-
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### Browse
+Visit [http://localhost:5173/](http://localhost:5173/) in a web browser to see the application
 
+## Deployment
+
+This application was meant to be deployed on Azure Web App Service with a Node 20 application runtime.
+
+In the configuration on Azure portal for the web app, the following startup command is required and must be set for the web app to work
 ```sh
-npm run build
+pm2 serve /home/site/wwwroot/dist --no-daemon --spa
 ```
+
+The app is currently deployed at [https://orjourney.azurewebsites.net/](https://orjourney.azurewebsites.net/)
