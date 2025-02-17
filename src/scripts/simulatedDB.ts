@@ -3,7 +3,7 @@ import type { Operation, User } from "@/types"
 export const operations: Record<string, Operation> = {
     "2fa35c90-4fad-4bc1-886e-cad4cf1f2591": {
         "id": "2fa35c90-4fad-4bc1-886e-cad4cf1f2591",
-        "procedure": "Right Temporal Lobe Meningioma Surgical Resection of Right Motor Strip Tumor",
+        "procedure": "Surgical Resection of Right Motor Strip Tumor",
         "duration": 3.5,
         "starttime": "2024-01-23T07:30",
         "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A lesion in the motor strip can cause weakness or paralysis on the body.",

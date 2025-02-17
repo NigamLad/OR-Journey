@@ -9,7 +9,7 @@ The information presented includes:
 - Surgical Field Microscope Video Clips
 - SmartForceps Analytics
 
-*The information shown in this app is meant for demonstration purposes only and does not represent real person's surgical procedures. Images and videos have been sourced online are anonymized and do not hold any copyrights. Sources will be listed below.*
+*The information shown in this app is meant for demonstration purposes only and does not represent a real person's surgical procedures. Images and videos have been sourced online are anonymized and do not hold any copyrights. Sources will be listed below.*
 
 ## Features
 - VueJS - Vue 3 web framework for ease of development of design and functionality
