@@ -3,7 +3,7 @@
   import * as Fancyapps from '@fancyapps/ui';
   const { Fancybox } = Fancyapps;
 
-  type FancyboxOptionsType = ConstructorParameters<typeof Fancybox>[1];
+  export type FancyboxOptionsType = ConstructorParameters<typeof Fancybox>[1];
 
   const props = defineProps<{
     delegate?: string;

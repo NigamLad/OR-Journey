@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { OperationEvent } from '../types';
-
-//@ts-ignore
-import Fancybox from './Fancybox.vue';
+import Fancybox from '@/components/Fancybox.vue';
+import { FancyBoxOptions } from '@/scripts/fancyboxConfig';
+import Image from './icons/image.vue';
+import VideoCamera from './icons/video-camera.vue';
+import ClipboardPulse from './icons/clipboard-pulse.vue';
+import PlusCircle from './icons/plus-circle.vue';
+import DashCircle from './icons/dash-circle.vue';
 
 const props = defineProps<{ event: OperationEvent }>()
-const baseURL = new URL(import.meta.url).origin;
 const eventElement = ref()
 const eventBody = ref()
 const collapsed = ref(true)
@@ -21,32 +24,33 @@ function toggleCollapse() {
         eventElement.value.classList.add("WithBackground")
     }
 }
-
 </script>
 
 <template>
 
     <div id="event" ref="eventElement" @click="toggleCollapse" class="p-2 mb-3 text-xl">
         <div id="eventHeader" class="flex justify-between items-center">
-            <div id="eventName" class="overflow-hidden pr-4">{{ event.eventName }}</div>
+            <div class="flex items-center gap-4">
+                <div id="eventIcon">
+                    <div v-if="event.image">
+                        <Image />
+                    </div>
+                    <div v-else-if="event.video">
+                        <VideoCamera />
+                    </div>
+                    <div v-else>
+                        <ClipboardPulse />
+                    </div>
+                </div>
+                <div id="eventName" class="overflow-hidden pr-4">{{ event.eventName }}</div>
+            </div>
             <div id="collapseButton" class="relative">
-                <svg v-if="collapsed" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M10 18.75C5.16751 18.75 1.25 14.8325 1.25 10C1.25 5.16751 5.16751 1.25 10 1.25C14.8325 1.25 18.75 5.16751 18.75 10C18.75 14.8325 14.8325 18.75 10 18.75ZM10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20Z"
-                        fill="#8D9592" />
-                    <path
-                        d="M10 5C10.3452 5 10.625 5.27982 10.625 5.625V9.375H14.375C14.7202 9.375 15 9.65482 15 10C15 10.3452 14.7202 10.625 14.375 10.625H10.625V14.375C10.625 14.7202 10.3452 15 10 15C9.65482 15 9.375 14.7202 9.375 14.375V10.625H5.625C5.27982 10.625 5 10.3452 5 10C5 9.65482 5.27982 9.375 5.625 9.375H9.375V5.625C9.375 5.27982 9.65482 5 10 5Z"
-                        fill="#8D9592" />
-                </svg>
-                <svg v-else width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M10 18.75C5.16751 18.75 1.25 14.8325 1.25 10C1.25 5.16751 5.16751 1.25 10 1.25C14.8325 1.25 18.75 5.16751 18.75 10C18.75 14.8325 14.8325 18.75 10 18.75ZM10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20Z"
-                        fill="#8D9592" />
-                    <path
-                        d="M5 10C5 9.65482 5.27982 9.375 5.625 9.375H14.375C14.7202 9.375 15 9.65482 15 10C15 10.3452 14.7202 10.625 14.375 10.625H5.625C5.27982 10.625 5 10.3452 5 10Z"
-                        fill="#8D9592" />
-                </svg>
+                <div v-if="collapsed">
+                    <PlusCircle />
+                </div>
+                <div v-else>
+                    <DashCircle />
+                </div>
             </div>
         </div>
         <div id="eventBody" ref="eventBody" class="Collapsed" @click.stop>
@@ -55,42 +59,27 @@ function toggleCollapse() {
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
                     <div class="select-none" v-if="event.image">
-                        <Fancybox>
-                            <a data-fancybox="gallery" :href="event.image">
+                        <Fancybox :options="FancyBoxOptions">
+                            <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
                                 <img class="border-white border-2 rounded-lg" :src="event.image">
                             </a>
                         </Fancybox>
                     </div>
-                    
                     <div v-if="event.video" class=" flex flex-col">
                         <div class="relative h-full">
-                            <!-- <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
-                                Graphic Content
-                                <br>
-                                Click to Show
-                            </div>
-                            <video class="border-white border-2 rounded-lg" controls muted>
-                                <source :src="event.video">
-                            </video> -->
-                            <div class="flex flex-col justify-center items-center backdrop-blur-xl absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
-                                Graphic Content
-                                <br>
-                                Click to Show
-                            </div>
-                            <Fancybox>
-                                <a data-fancybox="gallery" :href="event.video">
-                                    <video class="border-white border-2 rounded-lg" preload="metadata" muted>
-                                        <source :src="event.video">
-                                    </video>
+                            <Fancybox :options="FancyBoxOptions">
+                                <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
+                                    <img class="border-white border-2 rounded-lg" src="/src/assets/Graphic-Content.svg">
                                 </a>
                             </Fancybox>
                         </div>
                         <div class="flex pt-4 items-center gap-1">
-                            <img class="object-scale-down" height="40px" width="40px" src="/src/assets/smartforceps.png">
+                            <img class="object-scale-down" height="40px" width="40px"
+                                src="/src/assets/smartforceps.png">
                             <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }} N</p>
                         </div>
                     </div>
-                    
+
                 </div>
                 <p class="float-right">
                     {{
@@ -174,5 +163,4 @@ hr {
     width: 75%;
     margin:auto;
 } */
-
 </style>
