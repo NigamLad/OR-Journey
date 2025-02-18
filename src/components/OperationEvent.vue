@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { OperationEvent } from '../types'
+import type { OperationEvent } from '../types';
+
+//@ts-ignore
+import Fancybox from './Fancybox.vue';
 
 const props = defineProps<{ event: OperationEvent }>()
 const baseURL = new URL(import.meta.url).origin;
@@ -46,22 +49,41 @@ function toggleCollapse() {
                 </svg>
             </div>
         </div>
-        <div ref="eventBody" id="eventBody" class="Collapsed" @click.stop>
+        <div id="eventBody" ref="eventBody" class="Collapsed" @click.stop>
             <div class="overflow-hidden">
                 <div class="px-1 py-2">
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
-                    <img class="border-white border-2 rounded-lg" v-if="event.image" :src="event.image">
+                    <div class="select-none" v-if="event.image">
+                        <Fancybox>
+                            <a data-fancybox="gallery" :href="event.image">
+                                <img class="border-white border-2 rounded-lg" :src="event.image">
+                            </a>
+                        </Fancybox>
+                    </div>
+                    
                     <div v-if="event.video" class=" flex flex-col">
                         <div class="relative h-full">
-                            <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
+                            <!-- <div class="flex flex-col justify-center items-center backdrop-blur-lg absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
                                 Graphic Content
                                 <br>
                                 Click to Show
                             </div>
                             <video class="border-white border-2 rounded-lg" controls muted>
                                 <source :src="event.video">
-                            </video>
+                            </video> -->
+                            <div class="flex flex-col justify-center items-center backdrop-blur-xl absolute w-full h-full z-10 cursor-default" @click.self="(e) => {(e.target as HTMLElement)?.classList.add('hidden')}">
+                                Graphic Content
+                                <br>
+                                Click to Show
+                            </div>
+                            <Fancybox>
+                                <a data-fancybox="gallery" :href="event.video">
+                                    <video class="border-white border-2 rounded-lg" preload="metadata" muted>
+                                        <source :src="event.video">
+                                    </video>
+                                </a>
+                            </Fancybox>
                         </div>
                         <div class="flex pt-4 items-center gap-1">
                             <img class="object-scale-down" height="40px" width="40px" src="/src/assets/smartforceps.png">
@@ -87,7 +109,6 @@ function toggleCollapse() {
     position: relative;
     background-color: #1C1C1C;
     border-radius: 10px;
-    z-index: 1;
 }
 
 #event::before {
@@ -106,7 +127,6 @@ function toggleCollapse() {
         /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */
         , #1C1C1C;
     border-radius: 10px;
-    z-index: -1;
     transition: opacity 0.5s linear;
     opacity: 0;
 }
@@ -129,6 +149,16 @@ function toggleCollapse() {
     display: grid;
     grid-template-rows: 1fr;
     transition: grid-template-rows 0.5s ease-out;
+}
+
+#eventHeader {
+    position: inherit;
+    z-index: 0;
+}
+
+#eventBody {
+    position: inherit;
+    z-index: 1;
 }
 
 #eventBody.Collapsed {

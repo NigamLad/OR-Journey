@@ -25,6 +25,8 @@ function guestLogin(id: string) {
 const container = ref()
 const loginButton = ref()
 const guestLoginButton = ref()
+const user1LoginButton = ref()
+const user2LoginButton = ref()
 onMounted(() => {
     setTimeout(() => {
         if (container.value)
@@ -32,6 +34,9 @@ onMounted(() => {
     }, 1000)
     initClickHandler(loginButton.value)
     initClickHandler(guestLoginButton.value)
+    initClickHandler(user1LoginButton.value)
+    initClickHandler(user2LoginButton.value)
+
 })
 
 </script>
@@ -39,7 +44,7 @@ onMounted(() => {
 <template>
     <div id="container" ref="container" class="flex flex-col items-center w-full pt-24">
         <div class="flex flex-col justify-center items-center pb-24">
-            <img src="/src/assets/Journey Logo.svg" width="100px">
+            <img src="/src/assets/Journey Logo White.svg" width="100px">
             <div class="text-5xl pt-5 font-extralight">OR Journey</div>
         </div>
 
@@ -53,11 +58,11 @@ onMounted(() => {
 
             </p>
 
-            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin('516e0881-4012-49ea-a8f8-276d1b424b02')">
+            <button id="guestLoginButton" ref="user1LoginButton" @click="guestLogin('516e0881-4012-49ea-a8f8-276d1b424b02')">
                 Mary Jones
             </button>
 
-            <button id="guestLoginButton" ref="guestLoginButton" @click="guestLogin('a2b3c4d5-6789-0123-4567-89abcdef0123')">
+            <button id="guestLoginButton" ref="user2LoginButton" @click="guestLogin('a2b3c4d5-6789-0123-4567-89abcdef0123')">
                 John Smith
             </button>
 

@@ -73,7 +73,7 @@ watch(address, (newValue) => {
 
             <button ref="operationsButton" @click="" class="flex items-center relative">
                 <Router-Link to="/operations">
-                    <div class="relative z-10">Operations</div>
+                    <div class="relative z-[1]">Operations</div>
                     <Transition name="tab-appear">
                         <NavTab v-if="$route.path == '/operations'" />
                     </Transition>
@@ -82,7 +82,7 @@ watch(address, (newValue) => {
 
             <button ref="galleryButton" @click="" class="flex items-center relative">
                 <Router-Link to="/gallery">
-                    <div class="relative z-10">Gallery</div>
+                    <div class="relative z-[1]">Gallery</div>
                     <Transition name="tab-appear">
                         <NavTab v-if="$route.path == '/gallery'" />
                     </Transition>
