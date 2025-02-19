@@ -10,15 +10,15 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.2.1",
+    "@azure/msal-browser": "^4.3.0",
     "@fancyapps/ui": "^5.0.36",
-    "@tailwindcss/vite": "^4.0.6",
+    "@tailwindcss/vite": "^4.0.7",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
     "cssnano": "^7.0.6",
     "pinia": "^3.0.1",
     "postcss": "^8.4.44",
-    "tailwindcss": "^4.0.5",
+    "tailwindcss": "^4.0.7",
     "vite-plugin-pwa": "^0.21.1",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
