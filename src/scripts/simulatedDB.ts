@@ -21,7 +21,7 @@ export const operations: Record<string, Operation> = {
             { "eventId": "guid", "timestamp": "2024-01-23T10:15", "type": "Intraoperative", "eventName": "Surgery complete", "description": "Your surgical procedure is now complete" },
             { "eventId": "guid", "timestamp": "2024-01-23T10:45", "type": "Post Operative", "eventName": "MRI Image - Post Op", "description": "An MRI image was taken of the right lateral hemisphere after the surgical operation", "image": "https://cdn.jsdelivr.net/gh/NigamLad/OR-Journey-CDN@main/images/30702c96-3c7f-46de-a134-10f0278db2e0.jpg" },
             { "eventId": "guid", "timestamp": "2024-01-23T11:00", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": "Anaesthesia drugs have stopped being administered" },
-            { "eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You we're transferred to the post anesthesia care unit" }
+            { "eventId": "guid", "timestamp": "2024-01-23T11:15", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You were transferred to the post anesthesia care unit" }
         ]
     },
     "96e978ad-261d-4134-96bd-21ddc2b815a2": {
@@ -47,7 +47,7 @@ export const operations: Record<string, Operation> = {
             { "eventId": "guid", "timestamp": "2024-01-23T12:00", "type": "Post Operative", "eventName": "MRI Image - Post Op", "description": "An MRI image was taken of the right lateral hemisphere after the surgical operation", "image": "https://cdn.jsdelivr.net/gh/NigamLad/OR-Journey-CDN@main/images/c24e8b34-43ab-467d-8fad-0888b40ff07a.jpg" },
             { "eventId": "guid", "timestamp": "2024-01-23T12:15", "type": "Post Operative", "eventName": "MRI Image - Post Op", "description": "An MRI image was taken of the right lateral hemisphere after the surgical operation", "image": "https://cdn.jsdelivr.net/gh/NigamLad/OR-Journey-CDN@main/images/2cefecef-37b1-4c3b-b8d3-90f9bd024f10.jpg" },
             { "eventId": "guid", "timestamp": "2024-01-23T12:20", "type": "Post Operative", "eventName": "Anesthesia reversal", "description": "Anaesthesia drugs have stopped being administered" },
-            { "eventId": "guid", "timestamp": "2024-01-23T12:30", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You we're transferred to the post anesthesia care unit" }
+            { "eventId": "guid", "timestamp": "2024-01-23T12:30", "type": "Post Operative", "eventName": "Transfered to PACU", "description": "You were transferred to the post anesthesia care unit" }
         ]
     }
 }
