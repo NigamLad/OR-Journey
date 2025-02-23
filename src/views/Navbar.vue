@@ -56,12 +56,12 @@ watch(address, (newValue) => {
         <!-- <div class="w-full flex justify-evenly items-center"> -->
         <div class="w-full flex justify-around items-center">
 
-            <Router-Link to="/" id="link" class="relative">
+            <Router-Link to="/" class="relative h-[40px] w-[40px]">
                 <Transition name="logo-back-button" mode="out-in">
                     <div class="absolute" v-if="$route.path == '/'">
                         <img src="../assets/Journey Logo.svg" width="40px" height="40px">
                     </div>
-                    <div :ref="(el) => { initClickHandler(el) }" class="w-fit" v-else id="back-button">
+                    <div :ref="(el) => { initClickHandler(el) }" class="flex items-center justify-center rounded-full w-[40px] h-[40px] bg-[#232222]" v-else id="back-button">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M12.8333 7C12.8333 6.76988 12.6467 6.58333 12.4166 6.58333L2.58917 6.58333L5.21121 3.9613C5.37393 3.79858 5.37393 3.53476 5.21121 3.37204C5.04849 3.20932 4.78467 3.20932 4.62196 3.37204L1.28862 6.70537C1.12591 6.86809 1.12591 7.13191 1.28862 7.29463L4.62196 10.628C4.78467 10.7907 5.04849 10.7907 5.21121 10.628C5.37393 10.4652 5.37393 10.2014 5.21121 10.0387L2.58917 7.41667H12.4166C12.6467 7.41667 12.8333 7.23012 12.8333 7Z"
@@ -120,11 +120,6 @@ watch(address, (newValue) => {
     background-color: #171616;
 }
 
-#link {
-    height: 40px;
-    width: 40px;
-}
-
 /* #tab {
     width: calc(100% + 40px);
     height:60px;
@@ -142,21 +137,8 @@ button {
     transition: border-color 0.25s;
 }
 
-#profile {
-    background-color: #F46F51;
-    font-weight: 500;
-    color: white;
-    border-radius: 100%;
-}
-
 #back-button {
-    background-color: #232222;
-    border-radius: 100%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* background-color: #232222; */
 }
 
 .logo-back-button-enter-active,

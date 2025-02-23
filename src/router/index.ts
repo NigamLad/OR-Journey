@@ -30,14 +30,14 @@ const routes = [
         path: '/gallery',
         component: lazyLoad("Gallery")
     },
-    {
-        path: '/planning',
-        component: lazyLoad("Planning")
-    },
-    {
-        path: '/prescriptions',
-        component: lazyLoad("Prescriptions")
-    }
+    // {
+    //     path: '/planning',
+    //     component: lazyLoad("Planning")
+    // },
+    // {
+    //     path: '/prescriptions',
+    //     component: lazyLoad("Prescriptions")
+    // }
 ]
 
 const router = createRouter({
