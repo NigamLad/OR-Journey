@@ -10,27 +10,27 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.3.0",
-    "@fancyapps/ui": "^5.0.36",
-    "@tailwindcss/vite": "^4.0.7",
-    "autoprefixer": "^10.4.20",
-    "axios": "^1.7.7",
-    "cssnano": "^7.0.6",
-    "pinia": "^3.0.1",
-    "postcss": "^8.4.44",
-    "tailwindcss": "^4.0.7",
-    "vite-plugin-pwa": "^0.21.1",
-    "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "@azure/msal-browser": "4.5.0",
+    "@fancyapps/ui": "5.0.36",
+    "@tailwindcss/vite": "4.0.9",
+    "autoprefixer": "10.4.20",
+    "axios": "1.8.0",
+    "cssnano": "7.0.6",
+    "pinia": "3.0.1",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.0.9",
+    "vite-plugin-pwa": "0.21.1",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
-    "@types/node": "^22.13.4",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "@vue/tsconfig": "^0.7.0",
-    "npm-run-all2": "^7.0.2",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.0",
-    "vue-tsc": "^2.0.21"
+    "@tsconfig/node20": "20.1.4",
+    "@types/node": "22.13.5",
+    "@vitejs/plugin-vue": "5.2.1",
+    "@vue/tsconfig": "0.7.0",
+    "npm-run-all2": "7.0.2",
+    "typescript": "5.7.3",
+    "vite": "6.2.0",
+    "vue-tsc": "2.2.4"
   }
 }
