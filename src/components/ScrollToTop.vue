@@ -3,7 +3,7 @@ import ArrowUpShort from './icons/arrow-up-short.vue';
 </script>
 
 <template>
-    <div class="fixed bottom-4 right-3 p-2 bg-[#232222] border-1 border-[#C5C5C5] rounded-full z-10">
+    <div class="fixed bottom-10 right-12 p-2 bg-[#232222BF] border-1 border-[#C5C5C5] rounded-full z-10">
         <ArrowUpShort />
     </div>
 </template>
