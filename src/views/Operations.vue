@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { state } from "@/config/msalConfig";
 import LoadingComponent from '@/components/LoadingComponent.vue';
-import Card from "../components/FolderCard.vue";4
+import Card from "../components/FolderCard.vue";
 import type { Operation } from "@/types";
 import { users, operations } from "../scripts/simulatedDB";
 

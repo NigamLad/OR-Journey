@@ -32,11 +32,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="">
+    <div class="relative">
         <div>
             <button class="aspect-square" @click="toggleMenu">{{ account.firstname[0] + account.lastname[0] }}</button>
         </div>
-        <div ref="menu" id="menu" class="collapsed">
+        <div ref="menu" id="menu" class="collapsed absolute text-nowrap">
             <div>{{ account.firstname + " " + account.lastname }}</div>
             <hr>
             <div @click="handleLogout">Logout</div>

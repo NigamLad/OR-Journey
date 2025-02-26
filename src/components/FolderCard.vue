@@ -46,6 +46,7 @@ onMounted(() => {
         /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */
         , #1C1C1C;
     min-width: 140px;
+    max-width:250px;
     width: 100%;
     height: 130px;
 }

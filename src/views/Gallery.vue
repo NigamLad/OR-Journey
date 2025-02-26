@@ -21,7 +21,6 @@ const loadMedia = async () => {
         user_operations.sort((a: any, b: any) => new Date(a.starttime).getTime() - new Date(b.starttime).getTime());
         operationMedia.value = user_operations;
 
-
     } catch (error) {
         console.log("Failed to load case")
         console.log(error)
@@ -46,10 +45,10 @@ onMounted(() => {
                 </div>
                 <br>
                 <Fancybox :options="FancyBoxOptions">
-                    <div class="grid grid-cols-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                         <div v-for="event in operation.events.filter((e: Object) => (e.hasOwnProperty('image') || e.hasOwnProperty('video')))"
                             class="flex flex-col m-2 p-4 border-white border rounded-lg"
-                            :class="{ 'col-span-2': event.hasOwnProperty('video') }">
+                            :class="{ 'col-span-2': event.hasOwnProperty('video'), 'sm:col-span-1': event.hasOwnProperty('video') }">
                             <div v-if="event.hasOwnProperty('image')" class="flex flex-col justify-between gap-2">
                                 <Image />
                                 <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">

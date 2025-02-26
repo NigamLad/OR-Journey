@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, useTemplateRef, type Ref, nextTick } from 'vue';
 import OperationEvent from '../components/OperationEvent.vue';
 import type { Operation } from '@/types';
 import LoadingComponent from '@/components/LoadingComponent.vue';
@@ -7,11 +7,14 @@ import { operations, users } from '@/scripts/simulatedDB';
 import { state } from '@/config/msalConfig';
 import { useRouter } from 'vue-router';
 import Card from '@/components/Card.vue';
+import ScrollToTop from '@/components/ScrollToTop.vue';
+import CollapseAll from '@/components/CollapseAll.vue';
+import ExpandAll from '@/components/ExpandAll.vue';
 
 const router = useRouter();
 
 const props = defineProps({
-    id: {type: String, required: true}
+    id: { type: String, required: true }
 })
 
 const operationInfo = ref<Operation | null>(null);
@@ -31,26 +34,58 @@ onMounted(() => {
     // Check if the requested operation is in the user's cases
     const userCases = users[state.user?.localAccountId as string].cases;
     if (!userCases.includes(props.id)) {
-        router.push({path: '/'})
+        router.push({ path: '/' })
     }
 
     loadOperation();
 });
 
+const scrollArea = ref();
+const atTop = ref(true);
+function scrollListener(event: Event) {
+    if ((event.target as HTMLElement).scrollTop > 20)
+        atTop.value = false;
+    else
+        atTop.value = true;
+}
+function scrollToTop() {
+    (scrollArea.value as HTMLElement).scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const collapseState: Ref<boolean | undefined> = ref(undefined);
+function collapseAllEvents() {
+    collapseState.value = true;
+    nextTick(() => {
+        collapseState.value = undefined;
+    })
+}
+function expandAllEvents() {
+    collapseState.value = false;
+    nextTick(() => {
+        collapseState.value = undefined;
+    })
+}
+
 </script>
 
 <template>
-    <div class="p-4 overflow-x-hidden h-full touch-pan-y">
+    <div ref="scrollArea" @scroll="(e) => scrollListener(e)" class="p-4 overflow-x-hidden h-full touch-pan-y">
+        <Transition name="fade" mode="out-in">
+            <ScrollToTop v-if="!atTop" @click="scrollToTop()" />
+        </Transition>
         <div v-if="operationInfo">
-            <div class="font-normal flex justify-between mb-6">
+            <div class="font-normal flex justify-between">
                 <h1 class="text-2xl">{{ operationInfo.procedure }}</h1>
-                <!-- <h1 class="text-xl">{{ operationInfo.procedure }}</h1>
-                <h2 class="text-sm whitespace-nowrap">Duration: {{ operationInfo.duration }} hours</h2> -->
             </div>
-            <p class="mb-6">{{ operationInfo.description }}</p>
-            <div class="w-full grid grid-cols-2 grid-rows-3 gap-5 mb-6">
-            
-                <Card>
+            <hr>
+
+            <div class="w-full grid grid-cols-2 grid-rows-4 gap-5 py-4 sm:grid-cols-3 sm:grid-rows-2 lg:grid-cols-4">
+
+                <div class="col-span-2 sm:col-span-3 lg:col-span-2">
+                    <p class="my-2">{{ operationInfo.description }}</p>
+                </div>
+
+                <Card class="sm:row-start-2">
                     <template #title>
                         <h1 class="font-medium">Surgical Team</h1>
                         <br>
@@ -63,7 +98,7 @@ onMounted(() => {
                     </template>
                 </Card>
 
-                <Card>
+                <Card class="sm:col-start-1 lg:row-start-2 lg:col-start-2">
                     <template #title>
                         <h1 class="font-medium">Duration</h1>
                         <br>
@@ -75,7 +110,7 @@ onMounted(() => {
                     </template>
                 </Card>
 
-                <Card class="col-span-2 row-span-2">
+                <Card class="col-span-2 row-span-2 sm:row-start-2 sm:col-start-2 lg:row-start-1 lg:col-start-3">
                     <template #title>
                         <div class="flex justify-between">
                             <h1 class="font-medium">SmartForceps Insights</h1>
@@ -91,7 +126,8 @@ onMounted(() => {
                                 </div>
                             </div>
                             <div>
-                                This is the average amount of force in Newtons applied to the brain tissue by the surgeons
+                                This is the average amount of force in Newtons applied to the brain tissue by the
+                                surgeons
                             </div>
                             <div>
                                 For this type of surgical procedure, the typical average force is 0.7 N
@@ -100,10 +136,26 @@ onMounted(() => {
                     </template>
                 </Card>
 
-            
             </div>
-            <div v-for="event in operationInfo.events">
-                <OperationEvent :event="event" />
+
+            <br>
+            <div class="flex justify-between">
+                <h1 class="text-2xl">Events</h1>
+                <div class="flex gap-4">
+                    <div @click="collapseAllEvents()">
+                        <CollapseAll />
+                    </div>
+                    <div @click="expandAllEvents()">
+                        <ExpandAll />
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <br>
+            <div class="flex flex-col">
+                <div v-for="event in operationInfo.events">
+                    <OperationEvent :event="event" :collapse="collapseState"/>
+                </div>
             </div>
         </div>
         <div v-else class="flex h-full">
@@ -112,4 +164,14 @@ onMounted(() => {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

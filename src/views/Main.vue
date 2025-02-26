@@ -17,7 +17,7 @@ onMounted(async () => {
 <template>
     <div id="container" ref="container" class="flex flex-col h-full w-full">
         <Navbar />
-        <div id="spacer" class="w-full"></div>
+        <div id="spacer" class="w-full h-[10px]"></div>
         <RouterView v-slot="{ Component }">
             <Transition name="slide-fade" mode="out-in">
                 <!-- <keep-alive :max="1"> -->

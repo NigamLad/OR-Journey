@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { OperationEvent } from '../types';
 import Fancybox from '@/components/Fancybox.vue';
 import { FancyBoxOptions } from '@/scripts/fancyboxConfig';
@@ -9,27 +9,23 @@ import ClipboardPulse from './icons/clipboard-pulse.vue';
 import PlusCircle from './icons/plus-circle.vue';
 import DashCircle from './icons/dash-circle.vue';
 
-const props = defineProps<{ event: OperationEvent }>()
+const props = defineProps<{ 
+    event: OperationEvent,
+    collapse?: boolean | undefined,
+}>()
 const eventElement = ref()
 const eventBody = ref()
-const collapsed = ref(true)
-function toggleCollapse() {
-    collapsed.value = !collapsed.value
+const collapsed = ref(false)
 
-    if (collapsed.value) {
-        eventBody.value.classList.add("Collapsed")
-        eventElement.value.classList.remove("WithBackground")
-    } else {
-        eventBody.value.classList.remove("Collapsed")
-        eventElement.value.classList.add("WithBackground")
-    }
-}
+watch(() => props.collapse, (value) => {
+    if(value !== undefined)
+        collapsed.value = value
+})
 </script>
 
 <template>
-
-    <div id="event" ref="eventElement" @click="toggleCollapse" class="p-2 mb-3 text-xl">
-        <div id="eventHeader" class="flex justify-between items-center">
+    <div id="event" ref="eventElement" :class="{'WithBackground': !collapsed}" class="p-2 mb-3 text-xl">
+        <div id="eventHeader" @click="collapsed = !collapsed" class="flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <div id="eventIcon">
                     <div v-if="event.image">
@@ -53,19 +49,19 @@ function toggleCollapse() {
                 </div>
             </div>
         </div>
-        <div id="eventBody" ref="eventBody" class="Collapsed" @click.stop>
+        <div id="eventBody" ref="eventBody" :class="{'Collapsed': collapsed}">
             <div class="overflow-hidden">
                 <div class="px-1 py-2">
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
-                    <div class="select-none" v-if="event.image">
+                    <div class="m-auto select-none sm:w-1/2" v-if="event.image">
                         <Fancybox :options="FancyBoxOptions">
                             <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
                                 <img class="border-white border-2 rounded-lg" :src="event.image">
                             </a>
                         </Fancybox>
                     </div>
-                    <div v-if="event.video" class=" flex flex-col">
+                    <div v-if="event.video" class="m-auto select-none sm:w-1/2">
                         <div class="relative h-full">
                             <Fancybox :options="FancyBoxOptions">
                                 <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
@@ -73,7 +69,7 @@ function toggleCollapse() {
                                 </a>
                             </Fancybox>
                         </div>
-                        <div class="flex pt-4 items-center gap-1">
+                        <div class="flex w-full pt-4 items-center gap-1">
                             <img class="object-scale-down" height="40px" width="40px"
                                 src="/src/assets/smartforceps.png">
                             <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }} N</p>
@@ -90,7 +86,6 @@ function toggleCollapse() {
             </div>
         </div>
     </div>
-
 </template>
 
 <style scoped>

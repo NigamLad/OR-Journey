@@ -42,8 +42,4 @@ onMounted(async () => {
     height:100%;
 }
 
-#spacer {
-    height: 5px;
-}
-
 </style>

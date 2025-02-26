@@ -54,14 +54,15 @@ watch(address, (newValue) => {
 <template>
     <div id="Navbar" class="flex flex-col antialiased bg-slate-400 text-gray-800 justify-center">
         <!-- <div class="w-full flex justify-evenly items-center"> -->
-        <div class="w-full flex justify-around items-center">
+        <div class="w-full flex justify-around items-center sm:justify-start sm:gap-8 sm:pl-8">
 
             <Router-Link to="/" class="relative h-[40px] w-[40px]">
                 <Transition name="logo-back-button" mode="out-in">
                     <div class="absolute" v-if="$route.path == '/'">
                         <img src="../assets/Journey Logo.svg" width="40px" height="40px">
                     </div>
-                    <div :ref="(el) => { initClickHandler(el) }" class="flex items-center justify-center rounded-full w-[40px] h-[40px] bg-[#232222]" v-else id="back-button">
+                    <div :ref="(el) => { initClickHandler(el) }"
+                        class="flex items-center justify-center rounded-full w-[40px] h-[40px] bg-[#232222]" v-else>
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M12.8333 7C12.8333 6.76988 12.6467 6.58333 12.4166 6.58333L2.58917 6.58333L5.21121 3.9613C5.37393 3.79858 5.37393 3.53476 5.21121 3.37204C5.04849 3.20932 4.78467 3.20932 4.62196 3.37204L1.28862 6.70537C1.12591 6.86809 1.12591 7.13191 1.28862 7.29463L4.62196 10.628C4.78467 10.7907 5.04849 10.7907 5.21121 10.628C5.37393 10.4652 5.37393 10.2014 5.21121 10.0387L2.58917 7.41667H12.4166C12.6467 7.41667 12.8333 7.23012 12.8333 7Z"
@@ -107,7 +108,9 @@ watch(address, (newValue) => {
                 </Router-Link>
             </button> -->
 
-            <Profile />
+            <div class="sm:absolute sm:right-0 sm:pr-8">
+                <Profile />
+            </div>
 
         </div>
     </div>
@@ -120,25 +123,14 @@ watch(address, (newValue) => {
     background-color: #171616;
 }
 
-/* #tab {
-    width: calc(100% + 40px);
-    height:60px;
-    left:calc(0% - 20px);
-    bottom:calc(0% - 20px);
-} */
-
 button {
     border-radius: 16px;
-    padding: 0 0.5em;
+    padding: 0 0.8em;
     height: 40px;
     background-color: #232222;
     color: #C5C5C5;
     cursor: pointer;
     transition: border-color 0.25s;
-}
-
-#back-button {
-    /* background-color: #232222; */
 }
 
 .logo-back-button-enter-active,
@@ -160,7 +152,5 @@ button {
 .tab-appear-enter-from,
 .tab-appear-leave-to {
     transform: scaleY(0);
-
-    /* opacity: 0; */
 }
 </style>
