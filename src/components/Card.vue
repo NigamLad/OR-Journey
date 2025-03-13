@@ -24,6 +24,6 @@
         , #1C1C1C;
     min-width: 140px;
     width: 100%;
-    min-height: 140px;
+    min-height: 100px;
 }
 </style>

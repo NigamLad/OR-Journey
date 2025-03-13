@@ -75,7 +75,6 @@ watch(() => props.collapse, (value) => {
                             <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }} N</p>
                         </div>
                     </div>
-
                 </div>
                 <p class="float-right">
                     {{
