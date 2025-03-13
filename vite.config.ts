@@ -23,7 +23,7 @@ export default defineConfig({
                     description: "Experience the operation you didn't see",
                     theme_color: '#000000',
                     background_color: '#000000',
-                    orientation: 'portrait',
+                    orientation: 'portrait-primary',
                     icons: [
                         {
                             "purpose": "maskable",
