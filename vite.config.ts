@@ -79,10 +79,10 @@ export default defineConfig({
                             "src": "/icons/Journey Logo White_x512.png",
                             "type": "image/png"
                         }
-                    ],
-                    workbox: {
-                        maximumFileSizeToCacheInBytes: 100000000000
-                    }
+                    ]
+                },
+                workbox: {
+                    maximumFileSizeToCacheInBytes: 100000000000
                 }
             }
         )
