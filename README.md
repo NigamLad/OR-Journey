@@ -26,10 +26,10 @@ The images and videos are from Dr. Farhad Limonadi MD, FAANS a Neurosurgery Solu
 *The information shown in this app is meant for demonstration purposes only and does not represent a real person's surgical procedures. Images and videos that have been sourced online are anonymized and do not hold any copyrights.*
 
 ## Features
-- VueJS - Vue 3 web framework for ease of development of design and functionality
-- Typescript - Ensures safer code and statically typed variables for reducing errors during development
-- TailwindCSS - Tailwind CSS framework for ease of development of styling and mobile first design
-- VitePWA - Progressive Web App can be installed on mobile devices for a native app experience
+- VueJS: Vue 3 web framework for ease of development of design and functionality
+- Typescript: Ensures safer code and statically typed variables for reducing errors during development
+- TailwindCSS: Tailwind CSS framework for ease of development of styling and mobile first design
+- VitePWA: Progressive Web App can be installed on mobile devices for a native app experience
 
 ## Project Setup
 
