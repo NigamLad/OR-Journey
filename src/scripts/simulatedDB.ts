@@ -6,6 +6,8 @@ export const operations: Record<string, Operation> = {
         "procedure": "Surgical Resection of Right Motor Strip Tumor",
         "duration": 3.5,
         "starttime": "2024-01-23T07:30",
+        "endtime": "2024-01-23T11:15",
+        "skintoskintime": 1.25,
         "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A lesion in the motor strip can cause weakness or paralysis on the body.",
         "events": [
             { "eventId": "guid_1", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
@@ -29,6 +31,8 @@ export const operations: Record<string, Operation> = {
         "procedure": "Right Frontal Craniotomy for Resection of Parafalcine Meningioma Tumour",
         "duration": 5.5,
         "starttime": "2024-01-25T07:00",
+        "endtime": "2024-01-23T12:30",
+        "skintoskintime": 2.25,
         "description": "You underwent craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A parafalcine meningioma is a tumor that grows between the brain's two hemispheres. Although typically benign, it can cause seizures, headaches, and other symptoms.",
         "events": [
             { "eventId": "guid_1", "timestamp": "2024-01-23T07:00", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },

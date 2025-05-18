@@ -8,6 +8,7 @@ import { operations, users } from '@/scripts/simulatedDB';
 import { state } from '@/config/msalConfig';
 import { useRouter } from 'vue-router';
 import Card from '@/components/Card.vue';
+import ForcePerformanceBar from '@/components/ForcePerformanceBar.vue';
 import ScrollToTop from '@/components/ScrollToTop.vue';
 import CollapseAll from '@/components/CollapseAll.vue';
 import ExpandAll from '@/components/ExpandAll.vue';
@@ -27,7 +28,6 @@ const loadOperation = async () => {
     try {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         operationInfo.value = operations[props.id];
-
     } catch (error) {
         console.log("Failed to load case")
         console.log(error)
@@ -43,6 +43,24 @@ onMounted(() => {
 
     loadOperation();
 });
+
+function formatHoursToHrsMins(decimalHours: number) {
+  const hours = Math.floor(decimalHours);
+  const mins = Math.round((decimalHours - hours) * 60);
+  
+  // Only hours, no minutes
+  if (mins === 0) {
+    return `${hours} hrs`;
+  }
+  
+  // Only minutes, no hours
+  if (hours === 0) {
+    return `${mins} mins`;
+  }
+  
+  // Both hours and minutes
+  return `${hours} hrs ${mins} mins`;
+}
 
 const scrollArea = ref();
 const atTop = ref(true);
@@ -73,11 +91,11 @@ function expandAllEvents() {
 </script>
 
 <template>
-    <div ref="scrollArea" @scroll="(e) => scrollListener(e)" class="p-4 overflow-x-hidden h-full touch-pan-y">
+    <div ref="scrollArea" @scroll="(e) => scrollListener(e)" class="p-4 overflow-x-hidden touch-pan-y">
         <Transition name="fade" mode="out-in">
             <ScrollToTop v-if="!atTop && !isLargeScreen" @click="scrollToTop()" />
         </Transition>
-        <div v-if="operationInfo" class="h-full lg:flex lg:flex-col">
+        <div v-if="operationInfo" class="lg:flex lg:flex-col">
             <div class="lg:h-3/8 lg:flex lg:flex-col">
                 <div class="font-normal flex justify-between">
                     <h1 class="text-2xl">{{ operationInfo.procedure }}</h1>
@@ -85,15 +103,15 @@ function expandAllEvents() {
                 </div>
                 <hr>
 
-                <div class="w-full grid grid-cols-2 grid-rows-4 gap-5 py-4 sm:grid-cols-3 sm:grid-rows-2 lg:grid-cols-7 xl:grid-cols-8">
+                <div class="w-full grid grid-cols-2 grid-rows-6 gap-5 py-4 sm:grid-cols-3 sm:grid-rows-5 lg:grid-rows-3 lg:grid-cols-4">
 
-                    <div class="col-span-2 sm:col-span-3 lg:col-span-4 xl:row-span-2 xl:col-span-3">
+                    <div class="col-span-2 sm:col-span-3 lg:col-span-2">
                         <p class="my-2">{{ operationInfo.description }}</p>
                     </div>
 
-                    <Card class="sm:row-start-2 lg:col-span-2 xl:row-start-1 xl:col-start-4 xl:col-span-2">
+                    <Card class="">
                         <template #title>
-                            <h1 class="font-medium pb-2">Surgical Team</h1>
+                            <h1 class="font-medium pb-2">Surgical Team 🩺</h1>
                         </template>
                         <template #content>
                             <div class="h-full flex flex-col gap-2 justify-center">
@@ -103,47 +121,69 @@ function expandAllEvents() {
                         </template>
                     </Card>
 
-                    <Card class="sm:col-start-1 lg:row-start-2 lg:col-start-3 lg:col-span-2 xl:row-start-2 xl:col-start-4 xl:col-span-2">
+                    <Card class="">
                         <template #title>
-                            <h1 class="font-medium pb-2">Duration</h1>
+                            <h1 class="font-medium pb-2">Total Duration 🕜</h1>
                         </template>
                         <template #content>
                             <div class="h-full flex flex-col text-2xl text-center justify-center">
-                                {{ operationInfo.duration }} hours
+                                {{ formatHoursToHrsMins(operationInfo.duration) }}
                             </div>
                         </template>
                     </Card>
 
-                    <Card class="col-span-2 row-span-2 sm:row-start-2 sm:col-start-2 lg:row-start-1 lg:col-start-5 lg:col-span-3 xl:col-start-6 xl:col-span-3">
+                    <Card class="">
+                        <template #title>
+                            <h1 class="font-medium pb-2">Skin-to-Skin Time 🕜</h1>
+                        </template>
+                        <template #content>
+                            <div class="h-full flex flex-col text-2xl text-center justify-center">
+                                {{ formatHoursToHrsMins(operationInfo.skintoskintime) }}
+                            </div>
+                        </template>
+                    </Card>
+
+                    <Card class="">
+                        <template #title>
+                            <h1 class="font-medium pb-2">Blood Transfusions 🩸</h1>
+                        </template>
+                        <template #content>
+                            <div class="h-full flex flex-col text-2xl text-center justify-center">
+                                3 Units
+                            </div>
+                        </template>
+                    </Card>
+
+                    <Card class="col-span-2 row-span-3 sm:row-start-2 sm:col-start-2 sm:row-span-4 lg:row-span-2 lg:col-start-3 lg:row-start-1 lg:row-span-3">
                         <template #title>
                             <div class="flex justify-between">
-                                <h1 class="font-medium">SmartForceps Insights</h1>
+                                <h1 class="font-medium">Surgeon Performance 📈</h1>
                                 <img height="40px" width="40px" src="/src/assets/smartforceps.png">
                             </div>
                         </template>
                         <template #content>
                             <div class="flex flex-col h-full justify-evenly">
                                 <div class="flex justify-center items-center gap-4">
-                                    <div class="flex items-end text-5xl text-center">
-                                        0.6
-                                        <p class="pl-1 text-base">N</p>
+                                    <div class="flex items-end text-4xl text-center">
+                                        Top 1%
                                     </div>
                                 </div>
                                 <div>
-                                    This is the average amount of force in Newtons applied to the brain tissue by the
-                                    surgeons
+                                    The skill and performance of your surgical team is in the top 1% globally.
                                 </div>
                                 <div>
-                                    For this type of surgical procedure, the typical average force is 0.7 N
+                                    <ForcePerformanceBar :force=0.6 />
+                                </div>
+                                <div>
+                                    An average force of 0.6 Newtons reflects exceptional technique, minimal tissue manipulation, and optimal force application during the procedure.
                                 </div>
                             </div>
                         </template>
                     </Card>
-
                 </div>
             </div>
 
-            <div class="lg:h-5/8 lg:flex lg:flex-col">
+            <!-- <div class="lg:h-5/8 lg:flex lg:flex-col">
                 <div class="pb-4">
                     <div class="flex justify-between pt-4">
                         <h1 class="text-2xl">Events</h1>
@@ -168,7 +208,7 @@ function expandAllEvents() {
                         <OperationEvent :event="event" :collapse="collapseState"/>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
 
         </div>

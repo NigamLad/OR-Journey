@@ -3,6 +3,8 @@ export interface Operation {
     procedure: string;
     duration: number;
     starttime: string;
+    endtime: string;
+    skintoskintime: number;
     description: string;
     events: OperationEvent[];
 }
