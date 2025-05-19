@@ -13,6 +13,8 @@ import ScrollToTop from '@/components/ScrollToTop.vue';
 import CollapseAll from '@/components/CollapseAll.vue';
 import ExpandAll from '@/components/ExpandAll.vue';
 import InteractiveEvents from '@/components/InteractiveEvents.vue';
+import Play from '@/components/icons/play.vue';
+import ClipboardData from '@/components/icons/clipboard-data.vue';
 
 const isLargeScreen = useMediaQuery('(min-width: 1024px)')
 
@@ -103,13 +105,31 @@ function expandAllEvents() {
                 </div>
                 <hr>
 
-                <div class="w-full grid grid-cols-2 grid-rows-6 gap-5 py-4 sm:grid-cols-3 sm:grid-rows-5 lg:grid-rows-3 lg:grid-cols-4">
-
-                    <div class="col-span-2 sm:col-span-3 lg:col-span-2">
+                <div class="w-full gap-5 py-4 grid grid-cols-2 grid-rows-7 md:grid-cols-6 md:grid-rows-6 lg:grid-cols-4">
+                    
+                    <div class="col-span-2 md:col-span-6 lg:col-span-3 lg:row-span-2">
                         <p class="my-2">{{ operationInfo.description }}</p>
                     </div>
 
-                    <Card class="">
+                    <div class="flex items-center justify-center md:col-span-3">
+                        <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
+                            <div>
+                                Start Journey
+                            </div>
+                            <Play />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center md:col-span-3">
+                        <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
+                            <div>
+                                Explore Procedure
+                            </div>
+                            <ClipboardData class ="pl-2" />
+                        </div>
+                    </div>
+
+                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
                         <template #title>
                             <h1 class="font-medium pb-2">Surgical Team 🩺</h1>
                         </template>
@@ -121,7 +141,7 @@ function expandAllEvents() {
                         </template>
                     </Card>
 
-                    <Card class="">
+                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
                         <template #title>
                             <h1 class="font-medium pb-2">Total Duration 🕜</h1>
                         </template>
@@ -132,7 +152,7 @@ function expandAllEvents() {
                         </template>
                     </Card>
 
-                    <Card class="">
+                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
                         <template #title>
                             <h1 class="font-medium pb-2">Skin-to-Skin Time 🕜</h1>
                         </template>
@@ -143,7 +163,7 @@ function expandAllEvents() {
                         </template>
                     </Card>
 
-                    <Card class="">
+                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
                         <template #title>
                             <h1 class="font-medium pb-2">Blood Transfusions 🩸</h1>
                         </template>
@@ -154,7 +174,7 @@ function expandAllEvents() {
                         </template>
                     </Card>
 
-                    <Card class="col-span-2 row-span-3 sm:row-start-2 sm:col-start-2 sm:row-span-4 lg:row-span-2 lg:col-start-3 lg:row-start-1 lg:row-span-3">
+                    <Card class="col-span-2 row-span-3 md:col-span-4 md:col-start-3 md:row-start-3 md:row-span-4">
                         <template #title>
                             <div class="flex justify-between">
                                 <h1 class="font-medium">Surgeon Performance 📈</h1>
