@@ -178,12 +178,21 @@ function getEventTypeColor(type: string | undefined): string {
 }
 
 // Handle drag progress events from the toggle arrow bar
-function handleExpandProgress(progress: number) {
-    // Emit progress for parent sync
-    emit('expandProgress', progress);
+function handleExpandProgress(pixelDistance: number) {
+    // Pass through the pixel distance to parent
+    emit('expandProgress', pixelDistance);
 
-    // Update drag state (true during drag, false when complete)
-    isDragging.value = progress > 0 && progress < 100;
+    // Update drag state based on special values
+    if (pixelDistance === 9999) {
+        // Complete expansion
+        isDragging.value = false;
+    } else if (pixelDistance === -9999) {
+        // Cancel expansion
+        isDragging.value = false;
+    } else {
+        // Normal dragging in progress
+        isDragging.value = pixelDistance !== 0;
+    }
 }
 
 // Configure title marquee animation when text overflows

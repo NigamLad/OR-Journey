@@ -22,14 +22,29 @@ const expandProgress = ref(0); // Track the expansion progress (0-100%)
 
 // Computed property to control the height based on drag progress
 const expandedHeight = computed(() => {
-    // Calculate height between 50% and 100% based on drag progress
-    // Using cubic-bezier easing calculation for smoother feel during dragging
-    const progress = expandProgress.value / 100;
-    const easedProgress = progress < 0.5 
-        ? 4 * progress * progress * progress 
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-    
-    return `${50 + (easedProgress * 50)}%`;
+    // When not dragging, use the determined height based on state
+    if (!isDragging.value || expandProgress.value === 0) {
+        return showFullEvents.value ? '100%' : '50%';
+    }
+
+    // REVERSED HEIGHT CALCULATION:
+    // - Drag UP (positive values from inverted signal): Always increases height
+    // - Drag DOWN (negative values from inverted signal): Always decreases height
+    const dragDistance = expandProgress.value;
+
+    // Get base height (either 50% or 100%)
+    const baseHeight = showFullEvents.value ? 100 : 50;
+
+    // Calculate height change: 5px drag = 1% height
+    const heightChange = Math.min(50, Math.abs(dragDistance) / 5);
+
+    if (dragDistance > 0) {
+        // Dragging UP (now positive due to inversion) → Always adds height (maximum 100%)
+        return `${Math.min(100, baseHeight + heightChange)}%`;
+    } else {
+        // Dragging DOWN (now negative due to inversion) → Always subtracts height (minimum 50%)
+        return `${Math.max(50, baseHeight - heightChange)}%`;
+    }
 });
 
 const loadOperation = async () => {
@@ -37,8 +52,7 @@ const loadOperation = async () => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         operationInfo.value = operations[props.id];
     } catch (error) {
-        console.log("Failed to load case")
-        console.log(error)
+        // Error handling without logging
     }
 }
 
@@ -46,7 +60,7 @@ const loadOperation = async () => {
 function goToEvent(index: number, direction: 'next' | 'prev' | 'direct' = 'direct') {
     // Store the direction for the transition
     lastTransitionDirection.value = direction;
-    
+
     // Update the current event index
     currentEventIndex.value = index;
 }
@@ -70,20 +84,36 @@ function toggleView() {
 const isDragging = ref(false);
 
 // Handle drag-based expansion
-function handleExpandProgress(progress: number) {
-    expandProgress.value = progress;
-    
-    // Set showFullEvents based on progress threshold
-    showFullEvents.value = progress > 50;
-    
-    // Detect if this is a drag in progress vs. end of drag
-    if (progress > 0 && progress < 100) {
-        isDragging.value = true;
+function handleExpandProgress(pixelDistance: number) {
+    // Handle special completion values
+    if (pixelDistance === 9999) {
+        // Special value: expand fully (dragged UP enough)
+        showFullEvents.value = true;
+        isExpandedView.value = true;
+        expandProgress.value = 0;
+        isDragging.value = false;
+    } else if (pixelDistance === -9999) {
+        // Special value: collapse fully (dragged DOWN enough)
+        showFullEvents.value = false;
+        isExpandedView.value = false;
+        expandProgress.value = 0;
+        isDragging.value = false;
+    } else if (pixelDistance === 0) {
+        // Reset to current state (drag canceled or not far enough)
+        expandProgress.value = 0;
+        isDragging.value = false;
     } else {
-        // When at 0 or 100, it's either completed or canceled drag
-        if (isDragging.value) {
-            isDragging.value = false;
+        // Handle live dragging
+        // Only allow valid drag directions:
+        // - When already expanded: Only handle negative values (DOWN = collapse)
+        // - When already collapsed: Only handle positive values (UP = expand)
+        if ((showFullEvents.value && pixelDistance > 0) || (!showFullEvents.value && pixelDistance < 0)) {
+            // Invalid direction for current state - ignore
+            return;
         }
+
+        expandProgress.value = pixelDistance;
+        isDragging.value = true;
     }
 }
 
@@ -101,26 +131,20 @@ onMounted(() => {
 <template>
     <div class="p-4 overflow-x-hidden touch-pan-y full-height-container flex flex-col">
         <div v-if="operationInfo" class="flex flex-col h-full">
-            <!-- <Transition name="fade">
-                <div v-show="!isExpandedView" class="mb-4 mt-4 clock-container">
-                    <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex" @navigate="goToEvent" />
-                </div>
-            </Transition>
-            
-            <div class="event-slideshow-container flex-1 flex flex-col">
-                <EventSlideshow :events="operationInfo.events" :currentEventIndex="currentEventIndex" @update:currentEventIndex="currentEventIndex = $event" @navigate="goToEvent" v-model:isExpandedView="isExpandedView" />
-            </div> -->            <div id="testLayout" class="h-full relative">                <Transition :name="isDragging ? '' : 'fade'">
+            <div id="testLayout" class="h-full relative">
+                <Transition :name="isDragging ? '' : 'fade'">
                     <div v-show="!isExpandedView" class="h-1/2" :class="{ 'no-transition': isDragging }">
                         <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex"
                             @navigate="(index, direction) => goToEvent(index, direction)" />
                     </div>
-                </Transition><div class="absolute w-full events-container" 
-                    :class="{ 'no-transition': isDragging }"
+                </Transition>
+                <div class="absolute w-full events-container" :class="{ 'no-transition': isDragging }"
                     :style="{ height: expandedHeight, bottom: '0' }">
                     <EventSlideshow :events="operationInfo.events" :currentEventIndex="currentEventIndex"
-                        :transitionDirection="lastTransitionDirection" 
-                        @update:currentEventIndex="currentEventIndex = $event" @navigate="(index, direction) => goToEvent(index, direction)"
-                        @toggle-view="toggleView" @expand-progress="handleExpandProgress" v-model:isExpandedView="isExpandedView" />
+                        :transitionDirection="lastTransitionDirection"
+                        @update:currentEventIndex="currentEventIndex = $event"
+                        @navigate="(index, direction) => goToEvent(index, direction)" @toggle-view="toggleView"
+                        @expand-progress="handleExpandProgress" v-model:isExpandedView="isExpandedView" />
                 </div>
             </div>
 
