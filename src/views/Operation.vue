@@ -7,6 +7,7 @@ import LoadingComponent from '@/components/LoadingComponent.vue';
 import { operations, users } from '@/scripts/simulatedDB';
 import { state } from '@/config/msalConfig';
 import { useRouter } from 'vue-router';
+import { initClickHandler } from "../scripts/clickAnimation";
 import Card from '@/components/Card.vue';
 import ForcePerformanceBar from '@/components/ForcePerformanceBar.vue';
 import ScrollToTop from '@/components/ScrollToTop.vue';
@@ -25,7 +26,6 @@ const props = defineProps({
 })
 
 const operationInfo = ref<Operation | null>(null);
-const baseURL = new URL(import.meta.url).origin;
 const loadOperation = async () => {
     try {
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -36,6 +36,8 @@ const loadOperation = async () => {
     }
 }
 
+const startJourney = ref<HTMLElement | null>(null);
+const exploreProcedure = ref<HTMLElement | null>(null);
 onMounted(() => {
     // Check if the requested operation is in the user's cases
     const userCases = users[state.user?.localAccountId as string].cases;
@@ -43,7 +45,11 @@ onMounted(() => {
         router.push({ path: '/' })
     }
 
-    loadOperation();
+    loadOperation().then(() => {
+        initClickHandler(startJourney.value as HTMLElement)
+        initClickHandler(exploreProcedure.value as HTMLElement)
+    });
+
 });
 
 function formatHoursToHrsMins(decimalHours: number) {
@@ -111,7 +117,7 @@ function expandAllEvents() {
                         <p class="my-2">{{ operationInfo.description }}</p>
                     </div>
 
-                    <div class="flex items-center justify-center md:col-span-3">
+                    <div ref="startJourney" @click="router.push(`/journey/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
                         <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
                             <div>
                                 Start Journey
@@ -120,7 +126,7 @@ function expandAllEvents() {
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-center md:col-span-3">
+                    <div ref="exploreProcedure" class="flex items-center justify-center select-none md:col-span-3">
                         <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
                             <div>
                                 Explore Procedure
@@ -177,7 +183,7 @@ function expandAllEvents() {
                     <Card class="col-span-2 row-span-3 md:col-span-4 md:col-start-3 md:row-start-3 md:row-span-4">
                         <template #title>
                             <div class="flex justify-between">
-                                <h1 class="font-medium">Surgeon Performance 📈</h1>
+                                <h1 class="font-medium">Your Team 📈</h1>
                                 <img height="40px" width="40px" src="/src/assets/smartforceps.png">
                             </div>
                         </template>
@@ -189,7 +195,7 @@ function expandAllEvents() {
                                     </div>
                                 </div>
                                 <div>
-                                    The skill and performance of your surgical team is in the top 1% globally.
+                                    The skill and performance of your surgical team is in the top 100 surgeons in the world, reflecting their expertise and precision.
                                 </div>
                                 <div>
                                     <ForcePerformanceBar :force=0.6 />

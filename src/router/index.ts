@@ -27,6 +27,11 @@ const routes = [
         props: true
     },
     {
+        path: '/journey/:id',
+        component: lazyLoad("Journey"),
+        props: true
+    },
+    {
         path: '/gallery',
         component: lazyLoad("Gallery")
     },
