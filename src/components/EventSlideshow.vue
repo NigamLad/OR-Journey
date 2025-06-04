@@ -40,8 +40,11 @@ const titleRef = ref<HTMLHeadingElement | null>(null);
 const titleContainerRef = ref<HTMLDivElement | null>(null);
 const descriptionRef = ref<HTMLParagraphElement | null>(null);
 const descriptionContainerRef = ref<HTMLDivElement | null>(null);
+const mediaContainerRef = ref<HTMLDivElement | null>(null);
 const shouldAnimateTitle = ref(false);
 const shouldAnimateDescription = ref(false);
+const shouldAnimateMedia = ref(false);
+const shouldExpandMediaContainer = ref(false);
 const isTitleOverflowing = ref(false);
 const isDescriptionOverflowing = ref(false);
 const isDragging = ref(false);
@@ -76,18 +79,23 @@ watch(
             transitionName.value = direction === 'next' ? 'slide-right' :
                 direction === 'prev' ? 'slide-left' : 'slide-fade';
 
-            // Trigger transition effect
+            // Reset animations immediately
             isTransitioning.value = true;
-
-            // After transition is complete
+            shouldAnimateMedia.value = false;
+            shouldExpandMediaContainer.value = false;
+              // After slide transition is complete
             setTimeout(() => {
                 isTransitioning.value = false;
 
-                // Ensure animations are checked AFTER transition completes
-                nextTick(() => {
+                // The setTimeout already created a delay, so DOM should be updated
+                if (isExpandedView.value) {
+                    // Start the coordinated animation sequence only if view is expanded
+                    startCoordinatedAnimationSequence();
+                } else {
+                    // Just setup title and description animations if view is collapsed
                     setupTitleAnimation();
                     setupDescriptionAnimation();
-                });
+                }
             }, direction === 'direct' ? 150 : 300);
         }
     }
@@ -161,6 +169,14 @@ function goToEvent(index: number) {
 onMounted(() => {
     if (props.events && props.events.length > 0) {
         currentEventIndex.value = 0;
+        
+        // Wait for initial render to complete 
+        nextTick(() => {
+            if (isExpandedView.value) {
+                // Start the coordinated animation sequence only if view is expanded
+                startCoordinatedAnimationSequence();
+            }
+        });
     }
 });
 
@@ -359,13 +375,61 @@ function setupTitleAnimation() {
 
 // Watch for slide changes to recalculate animations
 watch(() => currentEventIndex.value, () => {
-    setupTitleAnimation();
-    setupDescriptionAnimation();
+    // Reset all animations immediately
+    shouldAnimateMedia.value = false;
+    shouldExpandMediaContainer.value = false;
+    
+    // Force a browser reflow to ensure the container's initial height is correctly set to 0
+    if (mediaContainerRef.value) {
+        void mediaContainerRef.value.offsetHeight;
+    }
+    
+    // Don't immediately set media animation true here if we're transitioning,
+    // as the transition watcher will handle it
+    if (!isTransitioning.value) {
+        // If we're not in a transition but index changed directly
+        if (isExpandedView.value) {
+            // Only start animations if the view is expanded
+            startCoordinatedAnimationSequence();
+        } else {
+            // If not expanded, just setup text animations
+            setupTitleAnimation();
+            setupDescriptionAnimation();
+        }
+    }
 });
 
 // Also watch for changes to the current event name and description
 watch(() => currentEvent.value?.eventName, setupTitleAnimation);
 watch(() => currentEvent.value?.description, setupDescriptionAnimation);
+
+// Watch for changes to expanded view to trigger media animation
+watch(() => isExpandedView.value, (newVal) => {
+    // Reset animations immediately in all cases
+    shouldAnimateMedia.value = false;
+    shouldExpandMediaContainer.value = false;
+    
+    // Force a browser reflow to ensure styles are applied immediately
+    if (mediaContainerRef.value) {
+        void mediaContainerRef.value.offsetHeight;
+    }
+    
+    if (newVal) {
+        // If expanding and we have media content
+        if (['image', 'video'].includes(currentEventType.value as string)) {
+            // Wait for expand transition to complete first
+            setTimeout(() => {
+                // Then start our coordinated animation sequence
+                startCoordinatedAnimationSequence();
+            }, 250); // Wait for expansion transition to complete
+        } else {
+            // Just setup text animations for non-media content
+            setupTitleAnimation();
+            setupDescriptionAnimation();
+        }
+    }
+    // No animations needed when collapsing - they're already reset above
+});
 
 // Handle window resize to recalculate animation if needed
 function handleResize() {
@@ -396,10 +460,18 @@ function setupTitleObserver() {
 // Initialize component
 onMounted(() => {
     if (props.events?.length > 0) {
-        currentEventIndex.value = 0;        // Setup initial animation state with nextTick to ensure DOM is rendered
+        currentEventIndex.value = 0;
+        
+        // Setup initial animation state with nextTick to ensure DOM is rendered
         nextTick(() => {
-            setupTitleAnimation();
-            setupDescriptionAnimation();
+            if (isExpandedView.value) {
+                // Start the coordinated animation sequence only if view is expanded
+                startCoordinatedAnimationSequence();
+            } else {
+                // Just setup text animations if view is collapsed
+                setupTitleAnimation();
+                setupDescriptionAnimation();
+            }
         });
 
         // Add resize listener to handle viewport changes
@@ -422,6 +494,32 @@ onUnmounted(() => {
         descriptionObserver = null;
     }
 });
+
+// Helper function to coordinate all animations in proper sequence
+function startCoordinatedAnimationSequence() {
+    // Reset all animation states
+    shouldAnimateMedia.value = false;
+    shouldExpandMediaContainer.value = false;
+    
+    // Force a browser reflow to ensure the container is initially set to height 0
+    if (mediaContainerRef.value) {
+        void mediaContainerRef.value.offsetHeight;
+    }
+    
+    // First step: expand the container
+    setTimeout(() => {
+        shouldExpandMediaContainer.value = true;
+        
+        // Second step: fade in the media after container is fully expanded
+        setTimeout(() => {
+            shouldAnimateMedia.value = true;
+            
+            // Final step: ensure other animations (title, description) are checked
+            setupTitleAnimation();
+            setupDescriptionAnimation();
+        }, 500); // Wait for container to fully expand
+    }, 200); // Small initial delay
+}
 </script>
 
 <template>
@@ -486,26 +584,31 @@ onUnmounted(() => {
                                             {{ currentEvent?.eventName }}
                                         </h2>
                                     </div>
-                                </div>
-                                <!-- Media container -->
-                                <div v-if="isExpandedView && ['image', 'video'].includes(currentEventType as string)"
-                                    class="mb-4 flex justify-center w-full">
+                                </div>                                <!-- Media container -->                                <div v-if="isExpandedView && ['image', 'video'].includes(currentEventType as string)"
+                                    ref="mediaContainerRef"
+                                    class="flex justify-center w-full overflow-hidden transition-all duration-500 ease-in-out"
+                                    :style="{ maxHeight: shouldExpandMediaContainer ? '50vh' : '0', 
+                                             marginBottom: shouldExpandMediaContainer ? '1rem' : '0',
+                                             opacity: shouldExpandMediaContainer ? 1 : 0 }"
+                                    :class="{ 'media-container-expanded': shouldExpandMediaContainer }">
                                     <!-- Image content with Fancybox -->
                                     <Fancybox v-if="currentEventType === 'image'" :options="FancyBoxOptions"
-                                        :delegate="'[data-fancybox]'">
-                                        <a :href="currentEvent?.image" data-fancybox>
-                                            <img :src="currentEvent?.image" alt="Event Image" class="rounded-lg object-contain shadow-lg hover:shadow-xl 
-                                                       shadow-white/10 hover:shadow-white/20 
-                                                       transition-transform hover:scale-[1.02]" />
+                                        :delegate="'[data-fancybox]'" class="w-full">
+                                        <a :href="currentEvent?.image" data-fancybox class="block">                                            <img :src="currentEvent?.image" alt="Event Image" 
+                                                class="rounded-lg object-contain shadow-lg hover:shadow-xl 
+                                                       shadow-white/10 hover:shadow-white/20 w-full
+                                                       opacity-0 transition-all duration-500 ease-out delay-100"
+                                                :class="{ 'opacity-100 hover:scale-[1.02]': shouldAnimateMedia }" />
                                         </a>
                                     </Fancybox>
 
                                     <!-- Video content with Fancybox -->
                                     <Fancybox v-else-if="currentEventType === 'video'" :options="FancyBoxOptions"
-                                        :delegate="'[data-fancybox]'">
-                                        <a :href="currentEvent?.video" data-fancybox>
-                                            <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
-                                                         shadow-white/10 hover:shadow-white/20" controls>
+                                        :delegate="'[data-fancybox]'" class="w-full">
+                                        <a :href="currentEvent?.video" data-fancybox class="block">                                            <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
+                                                         shadow-white/10 hover:shadow-white/20 w-full
+                                                         opacity-0 transition-all duration-500 ease-out delay-100"
+                                                  :class="{ 'opacity-100': shouldAnimateMedia }" controls>
                                                 <source :src="currentEvent?.video" type="video/mp4">
                                                 Your browser does not support video playback.
                                             </video>
@@ -753,5 +856,11 @@ onUnmounted(() => {
     display: inline-block;
     min-width: 3.5rem;
     /* Ensures consistent spacing when time changes */
+}
+
+/* Media container animation */
+.media-container-expanded {
+    /* These styles are now applied inline for smoother transitions */
+    /* but keeping the class for backwards compatibility */
 }
 </style>
