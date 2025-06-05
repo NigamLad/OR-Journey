@@ -83,7 +83,7 @@ watch(
             isTransitioning.value = true;
             shouldAnimateMedia.value = false;
             shouldExpandMediaContainer.value = false;
-              // After slide transition is complete
+            // After slide transition is complete
             setTimeout(() => {
                 isTransitioning.value = false;
 
@@ -169,7 +169,7 @@ function goToEvent(index: number) {
 onMounted(() => {
     if (props.events && props.events.length > 0) {
         currentEventIndex.value = 0;
-        
+
         // Wait for initial render to complete 
         nextTick(() => {
             if (isExpandedView.value) {
@@ -275,31 +275,43 @@ function checkDescriptionOverflow() {
             return;
         }
 
-        // Force a recalculation of layout by triggering a reflow
-        void element.offsetHeight;
-
-        // Get the container height directly from container ref - max-h-[15vh]
-        const containerHeight = container.clientHeight;
-        const elementHeight = element.scrollHeight;
-        const overflowAmount = Math.max(0, elementHeight - containerHeight);
-
-        // Check if text overflows container
-        const isOverflowing = elementHeight > containerHeight && containerHeight > 0;
-        isDescriptionOverflowing.value = isOverflowing;
-
-        // Only apply animation class when overflowing
-        shouldAnimateDescription.value = isOverflowing;
-
-        if (isOverflowing) {
-            // Calculate distance to scroll (negative value moves text up)
-            // The exact distance needed is the overflow amount plus a small buffer
-            const moveDistance = -(overflowAmount) - 10;
-            descMarqueeDistance.value = moveDistance.toString();
-            // Set the marquee distance value
-        } else {
-            // Reset the CSS variable when not overflowing
+        // Don't animate description when in expanded view
+        if (isExpandedView.value) {
+            shouldAnimateDescription.value = false;
+            isDescriptionOverflowing.value = false;
             descMarqueeDistance.value = '0';
+            return;
         }
+
+        // Allow a bit more time for the animation to complete
+        // before checking for overflow to avoid calculation errors
+        setTimeout(() => {
+            // Force a recalculation of layout by triggering a reflow
+            void element.offsetHeight;
+
+            // Get the container height directly from container ref
+            const containerHeight = container.clientHeight;
+            const elementHeight = element.scrollHeight;
+            const overflowAmount = Math.max(0, elementHeight - containerHeight);
+
+            // Check if text overflows container
+            const isOverflowing = elementHeight > containerHeight && containerHeight > 0;
+            isDescriptionOverflowing.value = isOverflowing;
+
+            // Only apply animation class when overflowing
+            shouldAnimateDescription.value = isOverflowing;
+
+            if (isOverflowing) {
+                // Calculate distance to scroll (negative value moves text up)
+                // The exact distance needed is the overflow amount plus a small buffer
+                const moveDistance = -(overflowAmount) - 10;
+                descMarqueeDistance.value = moveDistance.toString();
+                // Set the marquee distance value
+            } else {
+                // Reset the CSS variable when not overflowing
+                descMarqueeDistance.value = '0';
+            }
+        }, 100); // Small delay to ensure transition has stabilized
     }, 50);
 }
 
@@ -378,12 +390,12 @@ watch(() => currentEventIndex.value, () => {
     // Reset all animations immediately
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
-    
+
     // Force a browser reflow to ensure the container's initial height is correctly set to 0
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
-    
+
     // Don't immediately set media animation true here if we're transitioning,
     // as the transition watcher will handle it
     if (!isTransitioning.value) {
@@ -408,27 +420,37 @@ watch(() => isExpandedView.value, (newVal) => {
     // Reset animations immediately in all cases
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
-    
+
     // Force a browser reflow to ensure styles are applied immediately
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
-    
+
+    // Handle description animation timing
     if (newVal) {
+        // When expanding, disable animation during transition
+        shouldAnimateDescription.value = false;
+        
         // If expanding and we have media content
         if (['image', 'video'].includes(currentEventType.value as string)) {
             // Wait for expand transition to complete first
             setTimeout(() => {
                 // Then start our coordinated animation sequence
                 startCoordinatedAnimationSequence();
-            }, 250); // Wait for expansion transition to complete
+            }, 500); // Increased wait time to match the transition duration
         } else {
-            // Just setup text animations for non-media content
-            setupTitleAnimation();
-            setupDescriptionAnimation();
+            // Just setup text animations for non-media content after the transition completes
+            setTimeout(() => {
+                setupTitleAnimation();
+                setupDescriptionAnimation();
+            }, 500); // Increased wait time to match the transition duration
         }
+    } else {
+        // When collapsing, check for description overflow after the transition completes
+        setTimeout(() => {
+            setupDescriptionAnimation();
+        }, 500); // Increased wait time to match the transition duration
     }
-    // No animations needed when collapsing - they're already reset above
 });
 
 // Handle window resize to recalculate animation if needed
@@ -461,7 +483,7 @@ function setupTitleObserver() {
 onMounted(() => {
     if (props.events?.length > 0) {
         currentEventIndex.value = 0;
-        
+
         // Setup initial animation state with nextTick to ensure DOM is rendered
         nextTick(() => {
             if (isExpandedView.value) {
@@ -500,20 +522,20 @@ function startCoordinatedAnimationSequence() {
     // Reset all animation states
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
-    
+
     // Force a browser reflow to ensure the container is initially set to height 0
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
-    
+
     // First step: expand the container
     setTimeout(() => {
         shouldExpandMediaContainer.value = true;
-        
+
         // Second step: fade in the media after container is fully expanded
         setTimeout(() => {
             shouldAnimateMedia.value = true;
-            
+
             // Final step: ensure other animations (title, description) are checked
             setupTitleAnimation();
             setupDescriptionAnimation();
@@ -584,18 +606,20 @@ function startCoordinatedAnimationSequence() {
                                             {{ currentEvent?.eventName }}
                                         </h2>
                                     </div>
-                                </div>                                <!-- Media container -->                                <div v-if="isExpandedView && ['image', 'video'].includes(currentEventType as string)"
+                                </div> <!-- Media container -->
+                                <div v-if="isExpandedView && ['image', 'video'].includes(currentEventType as string)"
                                     ref="mediaContainerRef"
                                     class="flex justify-center w-full overflow-hidden transition-all duration-500 ease-in-out"
-                                    :style="{ maxHeight: shouldExpandMediaContainer ? '50vh' : '0', 
-                                             marginBottom: shouldExpandMediaContainer ? '1rem' : '0',
-                                             opacity: shouldExpandMediaContainer ? 1 : 0 }"
-                                    :class="{ 'media-container-expanded': shouldExpandMediaContainer }">
+                                    :style="{
+                                        maxHeight: shouldExpandMediaContainer ? '50vh' : '0',
+                                        marginBottom: shouldExpandMediaContainer ? '1rem' : '0',
+                                        opacity: shouldExpandMediaContainer ? 1 : 0
+                                    }" :class="{ 'media-container-expanded': shouldExpandMediaContainer }">
                                     <!-- Image content with Fancybox -->
                                     <Fancybox v-if="currentEventType === 'image'" :options="FancyBoxOptions"
                                         :delegate="'[data-fancybox]'" class="w-full">
-                                        <a :href="currentEvent?.image" data-fancybox class="block">                                            <img :src="currentEvent?.image" alt="Event Image" 
-                                                class="rounded-lg object-contain shadow-lg hover:shadow-xl 
+                                        <a :href="currentEvent?.image" data-fancybox class="block"> <img
+                                                :src="currentEvent?.image" alt="Event Image" class="rounded-lg object-contain shadow-lg hover:shadow-xl 
                                                        shadow-white/10 hover:shadow-white/20 w-full
                                                        opacity-0 transition-all duration-500 ease-out delay-100"
                                                 :class="{ 'opacity-100 hover:scale-[1.02]': shouldAnimateMedia }" />
@@ -605,24 +629,23 @@ function startCoordinatedAnimationSequence() {
                                     <!-- Video content with Fancybox -->
                                     <Fancybox v-else-if="currentEventType === 'video'" :options="FancyBoxOptions"
                                         :delegate="'[data-fancybox]'" class="w-full">
-                                        <a :href="currentEvent?.video" data-fancybox class="block">                                            <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
+                                        <a :href="currentEvent?.video" data-fancybox class="block"> <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
                                                          shadow-white/10 hover:shadow-white/20 w-full
                                                          opacity-0 transition-all duration-500 ease-out delay-100"
-                                                  :class="{ 'opacity-100': shouldAnimateMedia }" controls>
+                                                :class="{ 'opacity-100': shouldAnimateMedia }" controls>
                                                 <source :src="currentEvent?.video" type="video/mp4">
                                                 Your browser does not support video playback.
                                             </video>
                                         </a>
                                     </Fancybox>
-                                </div>
-
-                                <!-- Description section - always visible with marquee effect -->
+                                </div>                                <!-- Description section - dynamic height based on view mode with animation -->
                                 <div v-if="currentEvent?.description"
-                                    class="text-center backdrop-blur-md bg-white/10 p-2 rounded-xl w-full max-w-2xl border border-white/20 shadow-lg max-h-[15vh] overflow-hidden"
+                                    class="text-center backdrop-blur-md bg-white/10 p-2 rounded-xl w-full max-w-2xl border border-white/20 shadow-lg overflow-hidden transition-all duration-500 ease-in-out"
+                                    :style="{ maxHeight: isExpandedView ? '100vh' : '15vh' }"
                                     ref="descriptionContainerRef">
                                     <p ref="descriptionRef" class="text-lg md:text-lg sm:text-base text-white m-0"
-                                        :class="{ 'description-marquee': shouldAnimateDescription }"
-                                        :style="{ '--marquee-distance-vertical': shouldAnimateDescription ? `${descMarqueeDistance}px` : '0px' }">
+                                        :class="{ 'description-marquee': shouldAnimateDescription && !isExpandedView }"
+                                        :style="{ '--marquee-distance-vertical': shouldAnimateDescription && !isExpandedView ? `${descMarqueeDistance}px` : '0px' }">
                                         {{ currentEvent.description }}
                                     </p>
                                 </div>
@@ -657,7 +680,7 @@ function startCoordinatedAnimationSequence() {
 
                         <!-- Navigation controls -->
                         <div
-                            class="sticky bottom-0 backdrop-blur-sm flex justify-between items-center mt-auto pt-2 px-2 z-10">
+                            class="sticky bottom-0 flex justify-between items-center mt-auto pt-2 px-2 z-10">
                             <!-- Previous button -->
                             <button @click="goToPreviousEvent"
                                 class="px-4 py-2 text-sm rounded-full border border-white flex items-center gap-2 transition-all font-medium sm:px-2 sm:py-1.5"
@@ -858,9 +881,5 @@ function startCoordinatedAnimationSequence() {
     /* Ensures consistent spacing when time changes */
 }
 
-/* Media container animation */
-.media-container-expanded {
-    /* These styles are now applied inline for smoother transitions */
-    /* but keeping the class for backwards compatibility */
-}
+/* Media container animations are applied inline for smoother transitions */
 </style>

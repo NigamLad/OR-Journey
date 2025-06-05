@@ -32,14 +32,6 @@ watch(() => props.isExpanded, (newValue) => {
     }
 }, { immediate: true });
 
-// Computed style for visual feedback during dragging
-const dragTransform = computed(() => {
-    if (!isDragging.value) return '';
-
-    // Instead of physically moving the bar, just change its appearance during drag
-    return ''; // No transform needed - we'll use CSS for visual feedback instead
-});
-
 // Start drag operation
 function onDragStart(event: MouseEvent | TouchEvent) {
     isDragging.value = true;
