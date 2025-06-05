@@ -28,6 +28,11 @@ const autoUpdatePercentage = ref(true)
 const clockSize = ref(300)
 const clockContainer = ref<HTMLDivElement | null>(null)
 
+// Drag interaction state variables
+const isDragging = ref(false)
+const lastHoveredEventIndex = ref(-1)
+const dragHitRadius = 6 // Radius in SVG units to detect event hits when dragging
+
 // Animation properties
 const animating = ref(false)
 const displayedPercentage = ref(0)
@@ -383,6 +388,12 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('resize', updateClockSize)
     window.removeEventListener('orientationchange', updateClockSize)
+    
+    // Clean up drag event listeners if they somehow weren't removed
+    document.removeEventListener('mousemove', handleDragMove)
+    document.removeEventListener('touchmove', handleDragMove)
+    document.removeEventListener('mouseup', handleDragEnd)
+    document.removeEventListener('touchend', handleDragEnd)
 
     // Clean up ResizeObserver
     if (resizeObserver.value) {
@@ -417,6 +428,129 @@ function onSliderInput() {
         emit('navigate', closestIndex, 'direct');
     }
 }
+
+// DRAG INTERACTION FUNCTIONS
+// -------------------------
+
+// Convert screen coordinates to clock face coordinates
+function getClockCoordinates(clientX: number, clientY: number): { x: number, y: number } {
+    if (!clockContainer.value) return { x: 0, y: 0 };
+    
+    // Get the SVG element's bounding rectangle
+    const svgRect = clockContainer.value.querySelector('svg')?.getBoundingClientRect();
+    if (!svgRect) return { x: 0, y: 0 };
+    
+    // Calculate position relative to SVG viewBox (0,0 to 100,100)
+    const x = ((clientX - svgRect.left) / svgRect.width) * 100;
+    const y = ((clientY - svgRect.top) / svgRect.height) * 100;
+    
+    return { x, y };
+}
+
+// Calculate angle in degrees from center point
+function getAngleFromCoordinates(x: number, y: number): number {
+    // Calculate angle from center (50,50)
+    const deltaX = x - 50;
+    const deltaY = y - 50;
+    
+    // Calculate angle in radians, then convert to degrees
+    let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    
+    // Adjust angle to start from top (0 degrees at 12 o'clock)
+    angle = (angle + 90) % 360;
+    if (angle < 0) angle += 360;
+    
+    return angle;
+}
+
+// Calculate percentage from angle
+function getPercentageFromAngle(angle: number): number {
+    return (angle / 360) * 100;
+}
+
+// Calculate distance between two points
+function getDistance(x1: number, y1: number, x2: number, y2: number): number {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+// Handle start of drag (mouse or touch)
+function handleDragStart(event: MouseEvent | TouchEvent): void {
+    isDragging.value = true;
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('touchmove', handleDragMove, { passive: false });
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchend', handleDragEnd);
+    
+    // Process the initial position
+    handleDragMove(event);
+}
+
+// Handle drag movement
+function handleDragMove(event: MouseEvent | TouchEvent): void {
+    if (!isDragging.value) return;
+    
+    // Prevent default to avoid scrolling while dragging on touch devices
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+    
+    // Get client coordinates from either mouse or touch event
+    const clientX = 'touches' in event 
+        ? event.touches[0].clientX 
+        : (event as MouseEvent).clientX;
+    const clientY = 'touches' in event 
+        ? event.touches[0].clientY 
+        : (event as MouseEvent).clientY;
+    
+    // Convert to clock coordinates
+    const { x, y } = getClockCoordinates(clientX, clientY);
+    
+    // Calculate distance from center
+    const distanceFromCenter = getDistance(x, y, 50, 50);    // Only process if within or near the clock radius
+    if (distanceFromCenter <= 50) {
+        // We only check if we're hovering over any event dots
+        checkEventHits(x, y);
+    }
+}
+
+// Check if dragging over any event dots
+function checkEventHits(x: number, y: number): void {
+    // Skip if no events
+    if (!eventPositions.value || eventPositions.value.length === 0) return;
+    
+    // Find event closest to current drag position
+    let closestEvent = -1;
+    let closestDistance = Infinity;
+    
+    eventPositions.value.forEach(position => {
+        const distance = getDistance(x, y, position.x, position.y);
+        
+        // If within hit radius and closer than previous closest
+        if (distance <= dragHitRadius && distance < closestDistance) {
+            closestDistance = distance;
+            closestEvent = position.index;
+        }
+    });
+    
+    // If we found an event and it's different from the last one we hovered over
+    if (closestEvent >= 0 && closestEvent !== lastHoveredEventIndex.value) {
+        lastHoveredEventIndex.value = closestEvent;
+        // The navigateToEvent function will handle updating the progress
+        navigateToEvent(closestEvent);
+    }
+}
+
+// Handle end of drag
+function handleDragEnd(): void {
+    isDragging.value = false;
+    lastHoveredEventIndex.value = -1;
+    
+    // Remove event listeners
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('touchmove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
+    document.removeEventListener('touchend', handleDragEnd);
+}
 </script>
 
 <template>
@@ -425,24 +559,25 @@ function onSliderInput() {
         <div v-if="!events || events.length === 0"
             class="w-full h-[200px] flex items-center justify-center text-white/60 italic border border-dashed border-white/20 rounded-lg">
             <p>No events available</p>
-        </div>
-        <div v-else ref="clockContainer" class="relative mx-auto"
-            :style="{ width: `${clockSize}px`, height: `${clockSize}px` }">
-            <svg class="w-full h-full" viewBox="0 0 100 100">
+        </div>        <div v-else ref="clockContainer" class="relative mx-auto"
+            :style="{ width: `${clockSize}px`, height: `${clockSize}px` }">            <svg class="w-full h-full" :class="{ 'dragging': isDragging }" viewBox="0 0 100 100"
+                @mousedown="handleDragStart"
+                @touchstart="handleDragStart">
                 <!-- Define gradients -->
                 <defs>
                     <radialGradient id="clockGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
                         <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.2" />
                         <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
                     </radialGradient>
-                </defs>
-
-                <!-- Clock outline and background -->
+                </defs>                <!-- Clock outline and background -->
                 <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
                 <circle cx="50" cy="50" r="42.5" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
                 <circle cx="50" cy="50" r="41" fill="url(#clockGradient)" fill-opacity="0.1" />
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"
                     stroke-dasharray="1,1.5" />
+                
+                <!-- Transparent interaction layer for better touch detection -->
+                <circle cx="50" cy="50" r="45" fill="transparent" class="cursor-pointer" />
 
                 <!-- Hour markers -->
                 <line v-for="marker in hourMarkers" :key="marker.hour" :x1="marker.x1" :y1="marker.y1" :x2="marker.x2"
@@ -483,9 +618,7 @@ function onSliderInput() {
                         class="cursor-pointer transition-all duration-200 ease-in-out hover:brightness-[1.3]"
                         @click="navigateToEvent(position.index)" />
                     <title>{{ position.event.eventName }} - {{ position.formattedTime }}</title>
-                </g>
-
-                <!-- Active event dots -->
+                </g>                <!-- Active event dots -->
                 <g v-for="position in eventPositions.filter(p => p.isActive)" :key="'active-' + position.index">
                     <!-- Outer highlight -->
                     <circle :cx="position.x" :cy="position.y" r="6" :fill="getEventTypeColor(position.event.type)"
@@ -519,5 +652,10 @@ circle {
 
 .rounded-full {
     stroke-linecap: round;
+}
+
+/* Change cursor to grabbing when dragging */
+svg.dragging {
+    cursor: grabbing !important;
 }
 </style>
