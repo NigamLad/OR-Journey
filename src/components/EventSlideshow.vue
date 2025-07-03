@@ -46,8 +46,6 @@ const shouldAnimateTitle = ref(false);
 const shouldAnimateDescription = ref(false);
 const shouldAnimateMedia = ref(false);
 const shouldExpandMediaContainer = ref(false);
-const isTitleOverflowing = ref(false);
-const isDescriptionOverflowing = ref(false);
 const isDragging = ref(false);
 const isTransitioning = ref(false);
 const transitionName = ref('slide-fade');
@@ -92,24 +90,19 @@ watch(
     () => [props.currentEventIndex, props.transitionDirection],
     ([newIndex, direction]) => {
         if (newIndex !== undefined && direction) {
-            // Set transition properties based on direction
             transitionName.value = direction === 'next' ? 'slide-right' :
                 direction === 'prev' ? 'slide-left' : 'slide-fade';
 
-            // Reset animations immediately
             isTransitioning.value = true;
             shouldAnimateMedia.value = false;
             shouldExpandMediaContainer.value = false;
-            // After slide transition is complete
+            
             setTimeout(() => {
                 isTransitioning.value = false;
 
-                // The setTimeout already created a delay, so DOM should be updated
                 if (isExpandedView.value) {
-                    // Start the coordinated animation sequence only if view is expanded
                     startCoordinatedAnimationSequence();
                 } else {
-                    // Just setup title and description animations if view is collapsed
                     setupTitleAnimation();
                     setupDescriptionAnimation();
                 }
@@ -182,21 +175,6 @@ function goToEvent(index: number) {
     }
 }
 
-// Initialize on mount
-onMounted(() => {
-    if (props.events && props.events.length > 0) {
-        currentEventIndex.value = 0;
-
-        // Wait for initial render to complete 
-        nextTick(() => {
-            if (isExpandedView.value) {
-                // Start the coordinated animation sequence only if view is expanded
-                startCoordinatedAnimationSequence();
-            }
-        });
-    }
-});
-
 // Get color based on event type
 function getEventTypeColor(type: string | undefined): string {
     if (!type) return '#808080'; // Default gray
@@ -251,45 +229,28 @@ function handleExpandProgress(pixelDistance: number) {
 
 // Configure title marquee animation when text overflows
 function checkTitleOverflow() {
-    // Use a small debounce to prevent multiple rapid calls
     clearTimeout(window.titleOverflowTimer as number);
 
-    // Set a timer to the window object for debouncing
     window.titleOverflowTimer = setTimeout(() => {
         const element = titleRef.value;
 
-        if (!element) {
+        if (!element || !element.textContent?.trim()) {
             return;
         }
 
-        // Ensure the element has content
-        if (!element.textContent?.trim()) {
-            return;
-        }
-
-        // Force a recalculation of layout by triggering a reflow
         void element.offsetWidth;
 
         const parentWidth = element.parentElement?.clientWidth || 0;
         const elementWidth = element.scrollWidth;
         const overflowAmount = Math.max(0, elementWidth - parentWidth);
-
-        // Check if text overflows container
         const isOverflowing = elementWidth > parentWidth && parentWidth > 0;
-        isTitleOverflowing.value = isOverflowing;
 
-        // Only apply animation class when overflowing
         shouldAnimateTitle.value = isOverflowing;
 
         if (isOverflowing) {
-            // Calculate distance to scroll (negative value moves text left)
-            // The exact distance needed is the overflow amount plus a small buffer
             const moveDistance = -(overflowAmount) - 10;
-
-            // Set CSS variable for animation
             element.style.setProperty('--marquee-distance', `${moveDistance}px`);
         } else {
-            // Reset the CSS variable when not overflowing
             element.style.setProperty('--marquee-distance', '0px');
         }
     }, 50);
@@ -297,59 +258,38 @@ function checkTitleOverflow() {
 
 // Configure description marquee animation when text overflows
 function checkDescriptionOverflow() {
-    // Use a small debounce to prevent multiple rapid calls
     clearTimeout(window.descriptionOverflowTimer as number);
 
-    // Set a timer to the window object for debouncing
     window.descriptionOverflowTimer = setTimeout(() => {
         const element = descriptionRef.value;
         const container = descriptionContainerRef.value;
-        if (!element || !container) {
+        if (!element || !container || !element.textContent?.trim()) {
             return;
         }
 
-        // Ensure the element has content
-        if (!element.textContent?.trim()) {
-            return;
-        }
-
-        // Don't animate description when in expanded view
         if (isExpandedView.value) {
             shouldAnimateDescription.value = false;
-            isDescriptionOverflowing.value = false;
             descMarqueeDistance.value = '0';
             return;
         }
 
-        // Allow a bit more time for the animation to complete
-        // before checking for overflow to avoid calculation errors
         setTimeout(() => {
-            // Force a recalculation of layout by triggering a reflow
             void element.offsetHeight;
 
-            // Get the container height directly from container ref
             const containerHeight = container.clientHeight;
             const elementHeight = element.scrollHeight;
             const overflowAmount = Math.max(0, elementHeight - containerHeight);
-
-            // Check if text overflows container
             const isOverflowing = elementHeight > containerHeight && containerHeight > 0;
-            isDescriptionOverflowing.value = isOverflowing;
 
-            // Only apply animation class when overflowing
             shouldAnimateDescription.value = isOverflowing;
 
             if (isOverflowing) {
-                // Calculate distance to scroll (negative value moves text up)
-                // The exact distance needed is the overflow amount plus a small buffer
                 const moveDistance = -(overflowAmount) - 10;
                 descMarqueeDistance.value = moveDistance.toString();
-                // Set the marquee distance value
             } else {
-                // Reset the CSS variable when not overflowing
                 descMarqueeDistance.value = '0';
             }
-        }, 100); // Small delay to ensure transition has stabilized
+        }, 100);
     }, 50);
 }
 
@@ -395,74 +335,37 @@ function setupTitleObserver() {
 
 // Utility function to setup description animation
 function setupDescriptionAnimation() {
-    // Reset animation state
     shouldAnimateDescription.value = false;
-
-    // Refresh the mutation observer
     setupDescriptionObserver();
-
-    // Force immediate check for overflow using nextTick to ensure DOM is updated
+    
     nextTick(() => {
         checkDescriptionOverflow();
-
-        // Add multiple checks with increasing delays to ensure DOM is fully rendered
-        // This helps when switching between events with different content lengths
-        setTimeout(() => {
-            checkDescriptionOverflow();
-
-            // Final check after transition should be complete
-            setTimeout(() => {
-                checkDescriptionOverflow();
-            }, 300);
-        }, 150);
     });
 }
 
 // Utility function to setup title animation
 function setupTitleAnimation() {
-    // Reset animation state
     shouldAnimateTitle.value = false;
-
-    // Refresh the mutation observer
     setupTitleObserver();
-
-    // Force immediate check for overflow using nextTick to ensure DOM is updated
+    
     nextTick(() => {
         checkTitleOverflow();
-
-        // Add multiple checks with increasing delays to ensure DOM is fully rendered
-        // This helps when switching between events with different content lengths
-        setTimeout(() => {
-            checkTitleOverflow();
-
-            // Final check after transition should be complete
-            setTimeout(() => {
-                checkTitleOverflow();
-            }, 200);
-        }, 100);
     });
 }
 
 // Watch for slide changes to recalculate animations
 watch(() => currentEventIndex.value, () => {
-    // Reset all animations immediately
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
 
-    // Force a browser reflow to ensure the container's initial height is correctly set to 0
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
 
-    // Don't immediately set media animation true here if we're transitioning,
-    // as the transition watcher will handle it
     if (!isTransitioning.value) {
-        // If we're not in a transition but index changed directly
         if (isExpandedView.value) {
-            // Only start animations if the view is expanded
             startCoordinatedAnimationSequence();
         } else {
-            // If not expanded, just setup text animations
             setupTitleAnimation();
             setupDescriptionAnimation();
         }
@@ -475,46 +378,37 @@ watch(() => currentEvent.value?.description, setupDescriptionAnimation);
 
 // Watch for changes to expanded view to trigger media animation
 watch(() => isExpandedView.value, (newVal) => {
-    // Reset animations immediately in all cases
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
 
-    // Force a browser reflow to ensure styles are applied immediately
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
 
-    // Handle description animation timing
     if (newVal) {
-        // When expanding, disable animation during transition
         shouldAnimateDescription.value = false;
         
-        // If expanding and we have media content
-        if (['image', 'video'].includes(currentEventType.value as string)) {
-            // Wait for expand transition to complete first
-            setTimeout(() => {
-                // Then start our coordinated animation sequence
+        const hasMedia = ['image', 'video'].includes(currentEventType.value as string);
+        const delay = 500;
+        
+        setTimeout(() => {
+            if (hasMedia) {
                 startCoordinatedAnimationSequence();
-            }, 500); // Increased wait time to match the transition duration
-        } else {
-            // Just setup text animations for non-media content after the transition completes
-            setTimeout(() => {
+            } else {
                 setupTitleAnimation();
                 setupDescriptionAnimation();
-            }, 500); // Increased wait time to match the transition duration
-        }
+            }
+        }, delay);
     } else {
-        // When collapsing, check for description overflow after the transition completes
         setTimeout(() => {
             setupDescriptionAnimation();
-            checkScrollability(); // Also check scrollability after collapse
+            checkScrollability();
             
-            // Reset scroll position to top when collapsing
             if (scrollableContentRef.value) {
                 scrollableContentRef.value.scrollTop = 0;
                 isAtScrollTop.value = true;
             }
-        }, 500); // Increased wait time to match the transition duration
+        }, 500);
     }
 });
 
@@ -548,28 +442,22 @@ onMounted(() => {
     if (props.events?.length > 0) {
         currentEventIndex.value = 0;
 
-        // Setup initial animation state with nextTick to ensure DOM is rendered
         nextTick(() => {
             if (isExpandedView.value) {
-                // Start the coordinated animation sequence only if view is expanded
                 startCoordinatedAnimationSequence();
             } else {
-                // Just setup text animations if view is collapsed
                 setupTitleAnimation();
                 setupDescriptionAnimation();
             }
             
-            // Check if content is scrollable after initial render
             checkScrollability();
             
-            // Also set up the initial scroll position check
             if (scrollableContentRef.value) {
-                scrollableContentRef.value.scrollTop = 0; // Ensure we start at the top
+                scrollableContentRef.value.scrollTop = 0;
                 isAtScrollTop.value = true;
             }
         });
 
-        // Add resize listener to handle viewport changes
         window.addEventListener('resize', handleResize);
     }
 });
@@ -577,20 +465,16 @@ onMounted(() => {
 // Clean up event listeners when component is destroyed
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
-
-    // Clean up card drag listeners if they exist
     window.removeEventListener('mousemove', onCardDragMove);
     window.removeEventListener('touchmove', onCardDragMove);
     window.removeEventListener('mouseup', onCardDragEnd);
     window.removeEventListener('touchend', onCardDragEnd);
 
-    // Clear any pending timeout
     if (window.dragTimeoutId) {
         clearTimeout(window.dragTimeoutId);
         window.dragTimeoutId = undefined;
     }
 
-    // Disconnect MutationObservers
     if (titleObserver) {
         titleObserver.disconnect();
         titleObserver = null;
@@ -604,279 +488,151 @@ onUnmounted(() => {
 
 // Helper function to coordinate all animations in proper sequence
 function startCoordinatedAnimationSequence() {
-    // Reset all animation states
     shouldAnimateMedia.value = false;
     shouldExpandMediaContainer.value = false;
 
-    // Force a browser reflow to ensure the container is initially set to height 0
     if (mediaContainerRef.value) {
         void mediaContainerRef.value.offsetHeight;
     }
 
-    // First step: expand the container
     setTimeout(() => {
         shouldExpandMediaContainer.value = true;
 
-        // Second step: fade in the media after container is fully expanded
         setTimeout(() => {
             shouldAnimateMedia.value = true;
-
-            // Final step: ensure other animations (title, description) are checked
             setupTitleAnimation();
             setupDescriptionAnimation();
-        }, 500); // Wait for container to fully expand
-    }, 200); // Small initial delay
-}
-
-// Handle card drag start
-function handleCardDragStart(event: TouchEvent) {
-    // Only activate on primary touch (usually the first finger)
-    if (event.touches.length === 1) {
-        isCardDragging.value = true;
-        cardDragStartY.value = event.touches[0].clientY;
-        cardDragProgress.value = 0;
-
-        // Prevent default to avoid scrolling while dragging
-        event.preventDefault();
-    }
-}
-
-// Handle card drag move
-function handleCardDragMove(event: TouchEvent) {
-    if (isCardDragging.value) {
-        const deltaY = event.touches[0].clientY - cardDragStartY.value;
-        cardDragProgress.value = deltaY;
-
-        // Apply drag distance to card's transform
-        if (cardRef.value) {
-            cardRef.value.style.transform = `translateY(${deltaY}px)`;
-        }
-
-        // Prevent default to avoid scrolling while dragging
-        event.preventDefault();
-    }
+        }, 500);
+    }, 200);
 }
 
 // Card-wide swipe functionality
 function onCardDragStart(event: MouseEvent | TouchEvent) {
-    // Prevent starting drag on interactive elements that have their own drag functionality
     const target = event.target as HTMLElement;
-    if (target.closest('button') || 
-        target.closest('input') || 
-        target.closest('a:not([data-fancybox])') ||
-        target.closest('.horizontal-bar') || // Exclude horizontal bar component
-        target.closest('[class*="horizontal"]') || // Exclude any element with "horizontal" in class name
-        target.closest('[data-horizontal-bar]') || // Exclude if has horizontal bar data attribute
-        target.closest('svg') && target.closest('.horizontal-bar')) { // Exclude SVGs within horizontal bar
+    
+    // Prevent starting drag on interactive elements
+    if (target.closest('button, input, a:not([data-fancybox]), .horizontal-bar, [class*="horizontal"], [data-horizontal-bar]') ||
+        (target.closest('svg') && target.closest('.horizontal-bar'))) {
         return;
     }
 
-    // Check if we're interacting with media elements (images/videos)
+    // Handle media elements specially
     const isMediaElement = target.tagName === 'IMG' || target.tagName === 'VIDEO' || 
-                          target.closest('img') || target.closest('video');
+                          target.closest('img, video, [data-fancybox]');
     
-    // For media elements, we need to distinguish between drag and click
-    if (isMediaElement || target.closest('[data-fancybox]')) {
-        // Track initial position for media elements to detect drag vs click
-        let initialX = 0;
-        let initialY = 0;
-        
-        if (event instanceof MouseEvent) {
-            initialX = event.clientX;
-            initialY = event.clientY;
-        } else if (event.touches?.length) {
-            initialX = event.touches[0].clientX;
-            initialY = event.touches[0].clientY;
-        }
-        
-        // Add temporary listeners to detect movement
-        const moveThreshold = 10; // pixels
-        let hasMoved = false;
-        
-        const mediaIntentHandler = (moveEvent: MouseEvent | TouchEvent) => {
-            let currentX = 0;
-            let currentY = 0;
-            
-            if (moveEvent instanceof MouseEvent) {
-                currentX = moveEvent.clientX;
-                currentY = moveEvent.clientY;
-            } else if (moveEvent.touches?.length) {
-                currentX = moveEvent.touches[0].clientX;
-                currentY = moveEvent.touches[0].clientY;
-            }
-            
-            const deltaX = Math.abs(currentX - initialX);
-            const deltaY = Math.abs(currentY - initialY);
-            
-            if (deltaX > moveThreshold || deltaY > moveThreshold) {
-                hasMoved = true;
-                // This is a drag gesture, prevent Fancybox and start our drag
-                moveEvent.preventDefault();
-                moveEvent.stopPropagation();
-                cleanupMediaIntentListeners();
-                
-                // Start our card drag with the original event
-                startCardDrag(event, initialY, initialX);
-            }
-        };
-        
-        const mediaEndHandler = (endEvent: MouseEvent | TouchEvent) => {
-            cleanupMediaIntentListeners();
-            
-            if (!hasMoved) {
-                // This was a click/tap, allow Fancybox to handle it
-                // Don't prevent default, let the event bubble up to Fancybox
-                return;
-            } else {
-                // This was a drag, prevent any click behavior
-                endEvent.preventDefault();
-                endEvent.stopPropagation();
-            }
-        };
-        
-        const cleanupMediaIntentListeners = () => {
-            window.removeEventListener('mousemove', mediaIntentHandler);
-            window.removeEventListener('touchmove', mediaIntentHandler);
-            window.removeEventListener('mouseup', mediaEndHandler);
-            window.removeEventListener('touchend', mediaEndHandler);
-        };
-        
-        // Add listeners for media intent detection
-        window.addEventListener('mousemove', mediaIntentHandler, { passive: false });
-        window.addEventListener('touchmove', mediaIntentHandler, { passive: false });
-        window.addEventListener('mouseup', mediaEndHandler, { passive: false });
-        window.addEventListener('touchend', mediaEndHandler, { passive: false });
-        
-        return; // Exit here for media elements, let intent detection take over
+    if (isMediaElement) {
+        handleMediaDragStart(event);
+        return;
     }
 
-    // Check if the target is within a scrollable area and if that area is actually scrollable
+    // Handle scrollable content
     const scrollableParent = target.closest('.scrollable-content');
-    if (scrollableParent) {
-        const isScrollable = scrollableParent.scrollHeight > scrollableParent.clientHeight;
-        
-        // If content is not scrollable, always allow drag gestures
-        if (!isScrollable) {
-            startCardDrag(event);
-            return;
-        }
-        
-        // Content is scrollable, so we need to determine intent based on the simple rules
-        if (isScrollable) {
-            // Get scroll position information
-            const scrollTop = scrollableParent.scrollTop;
-            const isAtTop = scrollTop <= 1; // Very small threshold for "at top"
-            
-            // Get initial touch/mouse position to determine intent
-            let startY = 0;
-            let startX = 0;
-            if (event instanceof MouseEvent) {
-                startY = event.clientY;
-                startX = event.clientX;
-            } else if (event.touches?.length) {
-                startY = event.touches[0].clientY;
-                startX = event.touches[0].clientX;
-            }
-            
-            // Store the start positions for later use in determining drag vs scroll intent
-            cardDragStartY.value = startY;
-            cardDragStartX.value = startX;
-            
-            // Add a temporary listener to determine user intent
-            const intentHandler = (moveEvent: MouseEvent | TouchEvent) => {
-                let currentY = 0;
-                let currentX = 0;
-                if (moveEvent instanceof MouseEvent) {
-                    currentY = moveEvent.clientY;
-                    currentX = moveEvent.clientX;
-                } else if (moveEvent.touches?.length) {
-                    currentY = moveEvent.touches[0].clientY;
-                    currentX = moveEvent.touches[0].clientX;
-                }
-                
-                const deltaY = currentY - startY;
-                const deltaX = currentX - startX;
-                const isVerticalMovement = Math.abs(deltaY) > 5;
-                const isHorizontalMovement = Math.abs(deltaX) > 5;
-                
-                // Check for horizontal swipe first (navigation)
-                if (isHorizontalMovement && Math.abs(deltaX) > Math.abs(deltaY)) {
-                    cleanupIntentListeners();
-                    startCardDrag(event, startY, startX);
-                    return;
-                }
-                
-                // Then check for vertical movement (expand/collapse or scroll)
-                if (isVerticalMovement) {
-                    const isScrollingDown = deltaY > 0;
-                    
-                    // Simple rule: If expanded, at scroll top, and swiping down → collapse
-                    if (isExpandedView.value && isAtTop && isScrollingDown) {
-                        cleanupIntentListeners();
-                        startCardDrag(event, startY, startX);
-                        return;
-                    }
-                    
-                    // Simple rule: If collapsed and swiping up → expand (content shouldn't be scrollable when collapsed)
-                    if (!isExpandedView.value && !isScrollingDown) {
-                        cleanupIntentListeners();
-                        startCardDrag(event, startY, startX);
-                        return;
-                    }
-                    
-                    // Otherwise: allow normal scrolling
-                    cleanupIntentListeners();
-                    return;
-                }
-            };
-            
-            const cleanupIntentListeners = () => {
-                window.removeEventListener('mousemove', intentHandler);
-                window.removeEventListener('touchmove', intentHandler);
-                window.removeEventListener('mouseup', cleanupIntentListeners);
-                window.removeEventListener('touchend', cleanupIntentListeners);
-            };
-            
-            // Add intent detection listeners with passive touch for better performance
-            window.addEventListener('mousemove', intentHandler, { passive: false });
-            window.addEventListener('touchmove', intentHandler, { passive: false });
-            window.addEventListener('mouseup', cleanupIntentListeners);
-            window.addEventListener('touchend', cleanupIntentListeners);
-            
-            return; // Exit early to let intent handler take over
-        }
+    if (scrollableParent && scrollableParent.scrollHeight > scrollableParent.clientHeight) {
+        handleScrollableDragStart(event, scrollableParent as HTMLElement);
+        return;
     }
     
-    // No scrollable content or not scrollable, proceed with drag
     startCardDrag(event);
+}
+
+function handleMediaDragStart(event: MouseEvent | TouchEvent) {
+    const { clientX: initialX, clientY: initialY } = getEventCoordinates(event);
+    let hasMoved = false;
+    
+    const moveHandler = (moveEvent: MouseEvent | TouchEvent) => {
+        const { clientX, clientY } = getEventCoordinates(moveEvent);
+        if (Math.abs(clientX - initialX) > 10 || Math.abs(clientY - initialY) > 10) {
+            hasMoved = true;
+            moveEvent.preventDefault();
+            moveEvent.stopPropagation();
+            cleanup();
+            startCardDrag(event, initialY, initialX);
+        }
+    };
+    
+    const endHandler = (endEvent: MouseEvent | TouchEvent) => {
+        cleanup();
+        if (hasMoved) {
+            endEvent.preventDefault();
+            endEvent.stopPropagation();
+        }
+    };
+    
+    const cleanup = () => {
+        window.removeEventListener('mousemove', moveHandler);
+        window.removeEventListener('touchmove', moveHandler);
+        window.removeEventListener('mouseup', endHandler);
+        window.removeEventListener('touchend', endHandler);
+    };
+    
+    window.addEventListener('mousemove', moveHandler, { passive: false });
+    window.addEventListener('touchmove', moveHandler, { passive: false });
+    window.addEventListener('mouseup', endHandler, { passive: false });
+    window.addEventListener('touchend', endHandler, { passive: false });
+}
+
+function handleScrollableDragStart(event: MouseEvent | TouchEvent, scrollableParent: HTMLElement) {
+    const isAtTop = scrollableParent.scrollTop <= 1;
+    const { clientX: startX, clientY: startY } = getEventCoordinates(event);
+    
+    cardDragStartY.value = startY;
+    cardDragStartX.value = startX;
+    
+    const intentHandler = (moveEvent: MouseEvent | TouchEvent) => {
+        const { clientX, clientY } = getEventCoordinates(moveEvent);
+        const deltaY = clientY - startY;
+        const deltaX = clientX - startX;
+        
+        if (Math.abs(deltaX) > 5 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            cleanup();
+            startCardDrag(event, startY, startX);
+        } else if (Math.abs(deltaY) > 5) {
+            const isScrollingDown = deltaY > 0;
+            if ((isExpandedView.value && isAtTop && isScrollingDown) ||
+                (!isExpandedView.value && !isScrollingDown)) {
+                cleanup();
+                startCardDrag(event, startY, startX);
+            } else {
+                cleanup();
+            }
+        }
+    };
+    
+    const cleanup = () => {
+        window.removeEventListener('mousemove', intentHandler);
+        window.removeEventListener('touchmove', intentHandler);
+        window.removeEventListener('mouseup', cleanup);
+        window.removeEventListener('touchend', cleanup);
+    };
+    
+    window.addEventListener('mousemove', intentHandler, { passive: false });
+    window.addEventListener('touchmove', intentHandler, { passive: false });
+    window.addEventListener('mouseup', cleanup);
+    window.addEventListener('touchend', cleanup);
+}
+
+function getEventCoordinates(event: MouseEvent | TouchEvent) {
+    if (event instanceof MouseEvent) {
+        return { clientX: event.clientX, clientY: event.clientY };
+    } else {
+        return { 
+            clientX: event.touches[0]?.clientX || 0, 
+            clientY: event.touches[0]?.clientY || 0 
+        };
+    }
 }
 
 function startCardDrag(event: MouseEvent | TouchEvent, predeterminedStartY?: number, predeterminedStartX?: number) {
     isCardDragging.value = true;
-    isDragging.value = true; // Also set the main dragging state to disable transitions
-    swipeType.value = 'none'; // Reset swipe type
+    isDragging.value = true;
+    swipeType.value = 'none';
 
-    // Get the starting Y and X positions
-    if (predeterminedStartY !== undefined) {
-        cardDragStartY.value = predeterminedStartY;
-    } else if (event instanceof MouseEvent) {
-        cardDragStartY.value = event.clientY;
-    } else if (event.touches?.length) {
-        cardDragStartY.value = event.touches[0].clientY;
-    }
+    const { clientX, clientY } = getEventCoordinates(event);
+    cardDragStartY.value = predeterminedStartY ?? clientY;
+    cardDragStartX.value = predeterminedStartX ?? clientX;
 
-    if (predeterminedStartX !== undefined) {
-        cardDragStartX.value = predeterminedStartX;
-    } else if (event instanceof MouseEvent) {
-        cardDragStartX.value = event.clientX;
-    } else if (event.touches?.length) {
-        cardDragStartX.value = event.touches[0].clientX;
-    }
-
-    // Prevent default to avoid text selection while dragging
     event.preventDefault();
 
-    // Add event listeners for drag and release
     window.addEventListener('mousemove', onCardDragMove);
     window.addEventListener('touchmove', onCardDragMove, { passive: false });
     window.addEventListener('mouseup', onCardDragEnd);
@@ -886,157 +642,91 @@ function startCardDrag(event: MouseEvent | TouchEvent, predeterminedStartY?: num
 function onCardDragMove(event: MouseEvent | TouchEvent) {
     if (!isCardDragging.value) return;
 
-    // Prevent default to avoid scrolling while dragging
     event.preventDefault();
 
-    // Get current position
-    let currentY = 0;
-    let currentX = 0;
-    if (event instanceof MouseEvent) {
-        currentY = event.clientY;
-        currentX = event.clientX;
-    } else if (event.touches?.length) {
-        currentY = event.touches[0].clientY;
-        currentX = event.touches[0].clientX;
-    }
+    const { clientX, clientY } = getEventCoordinates(event);
+    const dragDistanceY = clientY - cardDragStartY.value;
+    const dragDistanceX = clientX - cardDragStartX.value;
 
-    // Calculate drag distances in pixels
-    const dragDistanceY = currentY - cardDragStartY.value; // Positive = down, Negative = up
-    const dragDistanceX = currentX - cardDragStartX.value; // Positive = right, Negative = left
-
-    // Determine swipe type if not already determined
+    // Determine swipe type
     if (swipeType.value === 'none') {
         const absY = Math.abs(dragDistanceY);
         const absX = Math.abs(dragDistanceX);
         
-        // Require some minimum movement to determine direction
         if (absY > 10 || absX > 10) {
-            // Determine primary direction based on which has more movement
-            if (absX > absY) {
-                swipeType.value = 'horizontal';
-            } else {
-                swipeType.value = 'vertical';
-            }
+            swipeType.value = absX > absY ? 'horizontal' : 'vertical';
         } else {
-            // Not enough movement yet, continue
             return;
         }
     }
 
     if (swipeType.value === 'horizontal') {
-        // Handle horizontal swipe for navigation
-        horizontalDragDirection.value = dragDistanceX; // Store horizontal direction
-        const absHorizontalDistance = Math.abs(dragDistanceX);
-        cardDragProgress.value = Math.max(0, Math.min(horizontalSwipeThreshold, absHorizontalDistance));
-        
-        // Visual feedback for horizontal swipe (could be used for navigation preview)
-        emit('expandProgress', 0); // No vertical progress for horizontal swipes
-        
+        horizontalDragDirection.value = dragDistanceX;
+        cardDragProgress.value = Math.max(0, Math.min(horizontalSwipeThreshold, Math.abs(dragDistanceX)));
+        emit('expandProgress', 0);
     } else if (swipeType.value === 'vertical') {
-        // Handle vertical swipe for expand/collapse (existing logic)
         cardDragDirection.value = dragDistanceY;
 
-        // Enhanced logic for valid drag directions:
-        // - If content is not scrollable: allow all card drag gestures
-        // - If content is scrollable: only allow card drag when at scroll boundaries
-        const scrollableParent = document.querySelector('.scrollable-content') as HTMLElement;
-        const isContentScrollable = scrollableParent ? 
-            scrollableParent.scrollHeight > scrollableParent.clientHeight : false;
-        
-        if (isContentScrollable) {
-            const isAtScrollTop = scrollableParent.scrollTop <= 1;
-            
-            if (isExpandedView.value) {
-                // When expanded with scrollable content:
-                // - Only allow down drag (collapse) when at scroll top
-                // - Block up drag (would interfere with scrolling)
-                if (dragDistanceY > 0 && isAtScrollTop) {
-                    // Down drag allowed when expanded and at scroll top (for collapse)
-                } else {
-                    // Block all other gestures when content is scrollable
-                    return;
-                }
-            } else {
-                // When collapsed, content shouldn't be scrollable, but if it is, only allow up drag
-                if (dragDistanceY < 0) {
-                    // Up drag allowed when collapsed (for expand)
-                } else {
-                    return;
-                }
-            }
-        } else {
-            // Content is not scrollable - allow normal card gestures
-            if (isExpandedView.value) {
-                // When expanded with no overflow: allow both up and down drag
-            } else {
-                // When collapsed: only allow up drag (expand)
-                if (dragDistanceY > 0) {
-                    return;
-                }
-            }
-        }
+        if (!isValidVerticalDrag(dragDistanceY)) return;
 
-        // Use absolute value for internal progress tracking, capped at threshold
         cardDragProgress.value = Math.max(0, Math.min(cardDragThreshold, Math.abs(dragDistanceY)));
-
-        // Emit the drag distance to parent for any visual feedback
         emit('expandProgress', -dragDistanceY);
+    }
+}
+
+function isValidVerticalDrag(dragDistanceY: number): boolean {
+    const scrollableParent = document.querySelector('.scrollable-content') as HTMLElement;
+    const isContentScrollable = scrollableParent?.scrollHeight > scrollableParent?.clientHeight;
+    
+    if (isContentScrollable) {
+        const isAtScrollTop = scrollableParent.scrollTop <= 1;
+        
+        if (isExpandedView.value) {
+            return dragDistanceY > 0 && isAtScrollTop;
+        } else {
+            return dragDistanceY < 0;
+        }
+    } else {
+        if (isExpandedView.value) {
+            return true;
+        } else {
+            return dragDistanceY <= 0;
+        }
     }
 }
 
 function onCardDragEnd() {
     if (!isCardDragging.value) {
-        // Even if card dragging is false, ensure isDragging is reset
         isDragging.value = false;
         return;
     }
 
     isCardDragging.value = false;
+    const threshold = swipeType.value === 'horizontal' ? horizontalSwipeThreshold * 0.5 : cardDragThreshold * 0.5;
 
-    // Handle different swipe types
-    if (swipeType.value === 'horizontal') {
-        // Handle horizontal navigation swipe
-        if (cardDragProgress.value >= horizontalSwipeThreshold * 0.5) {
+    if (cardDragProgress.value >= threshold) {
+        if (swipeType.value === 'horizontal') {
             if (horizontalDragDirection.value > 0) {
-                // Swiped right - go to previous event
                 goToPreviousEvent();
             } else {
-                // Swiped left - go to next event
                 goToNextEvent();
             }
-        }
-        
-    } else if (swipeType.value === 'vertical') {
-        // Handle vertical expand/collapse swipe (existing logic)
-        if (cardDragProgress.value >= cardDragThreshold * 0.5) {
-            // We've dragged far enough to trigger a state change
-            // But we need to check if it's in the correct direction
-            if (isExpandedView.value) {
-                // Currently expanded - only collapse on downward drag (positive direction)
-                if (cardDragDirection.value > 0) {
-                    isExpandedView.value = false;
-                    emit('expandProgress', -9999);
-                } else {
-                    // Upward drag when expanded - cancel the action
-                    emit('expandProgress', 0);
-                }
+        } else if (swipeType.value === 'vertical') {
+            if (isExpandedView.value && cardDragDirection.value > 0) {
+                isExpandedView.value = false;
+                emit('expandProgress', -9999);
+            } else if (!isExpandedView.value && cardDragDirection.value < 0) {
+                isExpandedView.value = true;
+                emit('expandProgress', 9999);
             } else {
-                // Currently collapsed - only expand on upward drag (negative direction)
-                if (cardDragDirection.value < 0) {
-                    isExpandedView.value = true;
-                    emit('expandProgress', 9999);
-                } else {
-                    // Downward drag when collapsed - cancel the action
-                    emit('expandProgress', 0);
-                }
+                emit('expandProgress', 0);
             }
-        } else {
-            // Not enough drag, cancel and reset
-            emit('expandProgress', 0);
         }
+    } else {
+        emit('expandProgress', 0);
     }
 
-    // Reset states - ensure isDragging is always reset
+    // Reset states
     cardDragProgress.value = 0;
     cardDragDirection.value = 0;
     horizontalDragDirection.value = 0;
@@ -1071,7 +761,6 @@ function onCardDragEnd() {
                         @mousedown="onCardDragStart"
                         @touchstart="onCardDragStart"
                         style="touch-action: manipulation;">
-                        <!-- Header with event type and time -->
                         <!-- Horizontal bar for expand/collapse -->
                         <div class="flex justify-center">
                             <HorizontalBar v-model:is-expanded="isExpandedView" @click="emit('toggle-view')"
@@ -1107,7 +796,7 @@ function onCardDragEnd() {
                                     </span>
                                 </div>
                             </div>
-                        </div> <!-- Content area at the top -->
+                        </div>
                         <div class="flex-grow flex flex-col items-center overflow-hidden">
                             <!-- Scrollable content area -->
                             <div ref="scrollableContentRef"
@@ -1126,7 +815,9 @@ function onCardDragEnd() {
                                             {{ currentEvent?.eventName }}
                                         </h2>
                                     </div>
-                                </div> <!-- Media container -->
+                                </div>
+                                
+                                <!-- Media container -->
                                 <div v-if="isExpandedView && ['image', 'video'].includes(currentEventType as string)"
                                     ref="mediaContainerRef"
                                     class="flex justify-center w-full overflow-hidden transition-all duration-500 ease-in-out"
@@ -1158,7 +849,9 @@ function onCardDragEnd() {
                                             </video>
                                         </a>
                                     </Fancybox>
-                                </div>                                <!-- Description section - dynamic height based on view mode with animation -->
+                                </div>
+                                
+                                <!-- Description section - dynamic height based on view mode with animation -->
                                 <div v-if="currentEvent?.description"
                                     class="text-center backdrop-blur-md bg-white/10 p-2 rounded-xl w-full max-w-2xl border border-white/20 shadow-lg overflow-hidden transition-all duration-500 ease-in-out"
                                     :style="{ maxHeight: isExpandedView ? '100vh' : '15vh' }"
@@ -1366,19 +1059,13 @@ function onCardDragEnd() {
 
 /* Title marquee animation */
 @keyframes marquee {
-
-    0%,
-    15% {
+    0%, 15% {
         transform: translateX(0);
     }
-
-    45%,
-    55% {
+    45%, 55% {
         transform: translateX(var(--marquee-distance, 0));
     }
-
-    85%,
-    100% {
+    85%, 100% {
         transform: translateX(0);
     }
 }
@@ -1391,50 +1078,15 @@ function onCardDragEnd() {
     max-width: fit-content;
 }
 
-/* Title entrance animations */
-.animate-title {
-    animation: titleFadeIn 0.5s ease-out, titleSlideIn 0.5s ease-out;
-}
-
-@keyframes titleFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes titleSlideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
 /* Description marquee animation */
 @keyframes marquee-vertical {
-
-    0%,
-    15% {
+    0%, 15% {
         transform: translateY(0);
     }
-
-    45%,
-    55% {
+    45%, 55% {
         transform: translateY(var(--marquee-distance-vertical, 0));
     }
-
-    85%,
-    100% {
+    85%, 100% {
         transform: translateY(0);
     }
 }
@@ -1465,8 +1117,6 @@ function onCardDragEnd() {
     /* Ensures consistent spacing when time changes */
 }
 
-/* Media container animations are applied inline for smoother transitions */
-
 /* Card drag interaction styles */
 .content-wrapper {
     transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
@@ -1477,26 +1127,11 @@ function onCardDragEnd() {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-.content-wrapper:active {
-    transform: scale(0.98);
-}
-
-/* Improved drag cursor feedback */
-.cursor-grab {
-    cursor: grab;
-}
-
-.cursor-grabbing {
-    cursor: grabbing;
-    user-select: none;
-}
-
 /* Improved media element interaction */
 [data-fancybox] img,
 [data-fancybox] video {
     cursor: pointer;
     touch-action: manipulation;
-    /* Smooth transition for better interaction feedback */
     transition: transform 0.1s ease-out;
 }
 
@@ -1511,18 +1146,5 @@ function onCardDragEnd() {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-}
-
-/* Horizontal swipe feedback */
-.content-wrapper.horizontal-swipe {
-    transition: transform 0.2s ease-out;
-}
-
-.content-wrapper.horizontal-swipe.swipe-left {
-    transform: translateX(-10px);
-}
-
-.content-wrapper.horizontal-swipe.swipe-right {
-    transform: translateX(10px);
 }
 </style>
