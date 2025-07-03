@@ -3,11 +3,10 @@
   import * as Fancyapps from '@fancyapps/ui';
   const { Fancybox } = Fancyapps;
 
-  export type FancyboxOptionsType = ConstructorParameters<typeof Fancybox>[1];
 
   const props = defineProps<{
     delegate?: string;
-    options?: Partial<FancyboxOptionsType>;
+    options?: Partial<any>;
   }>();
 
   const { delegate = '[data-fancybox]', options = {} } = props;
