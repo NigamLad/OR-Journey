@@ -34,19 +34,18 @@ onMounted(() => {
 
 <template>
     <div class="relative h-full w-full flex-col overflow-x-hidden touch-pan-y space-y-4 p-4">
-        <div v-if="operationInfo" class="w-full flex grid  grid-cols-2 gap-5">
-            <div class="flex" v-for="operation in operationInfo" :key="operation.id">
-                <Card
-                    :id="operation.id"
-                    :message="operation.procedure"
-                    :duration="`${operation.duration} hours`"
-                    :date="new Date(operation.starttime)" 
-                />
+        <LoadingComponent :isLoading="operationInfo == null">
+            <div class="w-full flex grid  grid-cols-2 gap-5">
+                <div class="flex" v-for="operation in operationInfo" :key="operation.id">
+                    <Card
+                        :id="operation.id"
+                        :message="operation.procedure"
+                        :duration="`${operation.duration} hours`"
+                        :date="new Date(operation.starttime)" 
+                    />
+                </div>
             </div>
-        </div>
-        <div v-else class="flex h-full">
-            <LoadingComponent />
-        </div>
+        </LoadingComponent>
     </div>
 </template>
 

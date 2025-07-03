@@ -103,144 +103,142 @@ function expandAllEvents() {
         <Transition name="fade" mode="out-in">
             <ScrollToTop v-if="!atTop && !isLargeScreen" @click="scrollToTop()" />
         </Transition>
-        <div v-if="operationInfo" class="lg:flex lg:flex-col">
-            <div class="lg:h-3/8 lg:flex lg:flex-col">
-                <div class="font-normal flex justify-between">
-                    <h1 class="text-2xl">{{ operationInfo.procedure }}</h1>
-                    <p>{{ new Date(operationInfo.starttime).toDateString() }}</p>
-                </div>
-                <hr>
-
-                <div class="w-full gap-5 py-4 grid grid-cols-2 grid-rows-7 md:grid-cols-6 md:grid-rows-6 lg:grid-cols-4">
-                    
-                    <div class="col-span-2 md:col-span-6 lg:col-span-3 lg:row-span-2">
-                        <p class="my-2">{{ operationInfo.description }}</p>
-                    </div>
-
-                    <div ref="startJourney" @click="router.push(`/journey/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
-                        <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
-                            <div>
-                                Start Journey
-                            </div>
-                            <Play />
-                        </div>
-                    </div>
-
-                    <div ref="exploreProcedure" class="flex items-center justify-center select-none md:col-span-3">
-                        <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
-                            <div>
-                                Explore Procedure
-                            </div>
-                            <ClipboardData class ="pl-2" />
-                        </div>
-                    </div>
-
-                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
-                        <template #title>
-                            <h1 class="font-medium pb-2">Surgical Team 🩺</h1>
-                        </template>
-                        <template #content>
-                            <div class="h-full flex flex-col gap-2 justify-center">
-                                <p>Dr. G Sutherland</p>
-                                <p>Dr. C Veilleux</p>
-                            </div>
-                        </template>
-                    </Card>
-
-                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
-                        <template #title>
-                            <h1 class="font-medium pb-2">Total Duration 🕜</h1>
-                        </template>
-                        <template #content>
-                            <div class="h-full flex flex-col text-2xl text-center justify-center">
-                                {{ formatHoursToHrsMins(operationInfo.duration) }}
-                            </div>
-                        </template>
-                    </Card>
-
-                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
-                        <template #title>
-                            <h1 class="font-medium pb-2">Skin-to-Skin Time 🕜</h1>
-                        </template>
-                        <template #content>
-                            <div class="h-full flex flex-col text-2xl text-center justify-center">
-                                {{ formatHoursToHrsMins(operationInfo.skintoskintime) }}
-                            </div>
-                        </template>
-                    </Card>
-
-                    <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
-                        <template #title>
-                            <h1 class="font-medium pb-2">Blood Transfusions 🩸</h1>
-                        </template>
-                        <template #content>
-                            <div class="h-full flex flex-col text-2xl text-center justify-center">
-                                3 Units
-                            </div>
-                        </template>
-                    </Card>
-
-                    <Card class="col-span-2 row-span-3 md:col-span-4 md:col-start-3 md:row-start-3 md:row-span-4">
-                        <template #title>
-                            <div class="flex justify-between">
-                                <h1 class="font-medium">Your Team 📈</h1>
-                                <img height="40px" width="40px" src="/src/assets/smartforceps.png">
-                            </div>
-                        </template>
-                        <template #content>
-                            <div class="flex flex-col h-full justify-evenly">
-                                <div class="flex justify-center items-center gap-4">
-                                    <div class="flex items-end text-4xl text-center">
-                                        Top 1%
-                                    </div>
-                                </div>
-                                <div>
-                                    The skill and performance of your surgical team is in the top 100 surgeons in the world, reflecting their expertise and precision.
-                                </div>
-                                <div>
-                                    <ForcePerformanceBar :force=0.6 />
-                                </div>
-                                <div>
-                                    An average force of 0.6 Newtons reflects exceptional technique, minimal tissue manipulation, and optimal force application during the procedure.
-                                </div>
-                            </div>
-                        </template>
-                    </Card>
-                </div>
-            </div>
-
-            <!-- <div class="lg:h-5/8 lg:flex lg:flex-col">
-                <div class="pb-4">
-                    <div class="flex justify-between pt-4">
-                        <h1 class="text-2xl">Events</h1>
-                        <div v-if="!isLargeScreen" class="flex gap-8">
-                            <div @click="collapseAllEvents()">
-                                <CollapseAll />
-                            </div>
-                            <div @click="expandAllEvents()">
-                                <ExpandAll />
-                            </div>
-                        </div>
+        <LoadingComponent :isLoading="operationInfo == null">
+            <div v-if="operationInfo" class="lg:flex lg:flex-col">
+                <div class="lg:h-3/8 lg:flex lg:flex-col">
+                    <div class="font-normal flex justify-between">
+                        <h1 class="text-2xl">{{ operationInfo.procedure }}</h1>
+                        <p>{{ new Date(operationInfo.starttime).toDateString() }}</p>
                     </div>
                     <hr>
-                </div>
 
-                <div v-if="isLargeScreen" class="h-full">
-                    <InteractiveEvents :events="operationInfo.events" />
-                </div>
+                    <div class="w-full gap-5 py-4 grid grid-cols-2 grid-rows-7 md:grid-cols-6 md:grid-rows-6 lg:grid-cols-4">
+                        
+                        <div class="col-span-2 md:col-span-6 lg:col-span-3 lg:row-span-2">
+                            <p class="my-2">{{ operationInfo.description }}</p>
+                        </div>
 
-                <div v-else class="flex flex-col">
-                    <div v-for="event in operationInfo.events">
-                        <OperationEvent :event="event" :collapse="collapseState"/>
+                        <div ref="startJourney" @click="router.push(`/journey/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
+                            <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
+                                <div>
+                                    Start Journey
+                                </div>
+                                <Play />
+                            </div>
+                        </div>
+
+                        <div ref="exploreProcedure" class="flex items-center justify-center select-none md:col-span-3">
+                            <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
+                                <div>
+                                    Explore Procedure
+                                </div>
+                                <ClipboardData class ="pl-2" />
+                            </div>
+                        </div>
+
+                        <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
+                            <template #title>
+                                <h1 class="font-medium pb-2">Surgical Team 🩺</h1>
+                            </template>
+                            <template #content>
+                                <div class="h-full flex flex-col gap-2 justify-center">
+                                    <p>Dr. G Sutherland</p>
+                                    <p>Dr. C Veilleux</p>
+                                </div>
+                            </template>
+                        </Card>
+
+                        <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
+                            <template #title>
+                                <h1 class="font-medium pb-2">Total Duration 🕜</h1>
+                            </template>
+                            <template #content>
+                                <div class="h-full flex flex-col text-2xl text-center justify-center">
+                                    {{ formatHoursToHrsMins(operationInfo.duration) }}
+                                </div>
+                            </template>
+                        </Card>
+
+                        <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
+                            <template #title>
+                                <h1 class="font-medium pb-2">Skin-to-Skin Time 🕜</h1>
+                            </template>
+                            <template #content>
+                                <div class="h-full flex flex-col text-2xl text-center justify-center">
+                                    {{ formatHoursToHrsMins(operationInfo.skintoskintime) }}
+                                </div>
+                            </template>
+                        </Card>
+
+                        <Card class="md:col-span-2 lg:col-span-1 lg:row-span-2">
+                            <template #title>
+                                <h1 class="font-medium pb-2">Blood Transfusions 🩸</h1>
+                            </template>
+                            <template #content>
+                                <div class="h-full flex flex-col text-2xl text-center justify-center">
+                                    3 Units
+                                </div>
+                            </template>
+                        </Card>
+
+                        <Card class="col-span-2 row-span-3 md:col-span-4 md:col-start-3 md:row-start-3 md:row-span-4">
+                            <template #title>
+                                <div class="flex justify-between">
+                                    <h1 class="font-medium">Your Team 📈</h1>
+                                    <img height="40px" width="40px" src="/src/assets/smartforceps.png">
+                                </div>
+                            </template>
+                            <template #content>
+                                <div class="flex flex-col h-full justify-evenly">
+                                    <div class="flex justify-center items-center gap-4">
+                                        <div class="flex items-end text-4xl text-center">
+                                            Top 1%
+                                        </div>
+                                    </div>
+                                    <div>
+                                        The skill and performance of your surgical team is in the top 100 surgeons in the world, reflecting their expertise and precision.
+                                    </div>
+                                    <div>
+                                        <ForcePerformanceBar :force=0.6 />
+                                    </div>
+                                    <div>
+                                        An average force of 0.6 Newtons reflects exceptional technique, minimal tissue manipulation, and optimal force application during the procedure.
+                                    </div>
+                                </div>
+                            </template>
+                        </Card>
                     </div>
                 </div>
-            </div> -->
 
+                <!-- <div class="lg:h-5/8 lg:flex lg:flex-col">
+                    <div class="pb-4">
+                        <div class="flex justify-between pt-4">
+                            <h1 class="text-2xl">Events</h1>
+                            <div v-if="!isLargeScreen" class="flex gap-8">
+                                <div @click="collapseAllEvents()">
+                                    <CollapseAll />
+                                </div>
+                                <div @click="expandAllEvents()">
+                                    <ExpandAll />
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
 
-        </div>
-        <div v-else class="flex h-full">
-            <LoadingComponent />
-        </div>
+                    <div v-if="isLargeScreen" class="h-full">
+                        <InteractiveEvents :events="operationInfo.events" />
+                    </div>
+
+                    <div v-else class="flex flex-col">
+                        <div v-for="event in operationInfo.events">
+                            <OperationEvent :event="event" :collapse="collapseState"/>
+                        </div>
+                    </div>
+                </div> -->
+
+            </div>
+        </LoadingComponent>
     </div>
 </template>
 

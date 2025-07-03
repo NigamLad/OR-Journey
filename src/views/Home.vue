@@ -32,8 +32,7 @@ onMounted(() => {
 
 <template>
     <div class="relative h-full w-full flex flex-col overflow-y-auto touch-pan-y space-y-4 p-4">
-        <div v-if="latestCase">
-
+        <LoadingComponent :isLoading="latestCase == null">
             <div id="message">
                 <div class="w-56">
                     <!-- <p>Ready to explore your latest surgery {{ account.firstname }}?</p> -->
@@ -87,14 +86,8 @@ onMounted(() => {
                     <MoreCard />
                 </Router-Link>
             </div> -->
-
-        </div>
-        <div v-else class="flex h-full">
-            <LoadingComponent />
-        </div>
-
+        </LoadingComponent>
     </div>
-
 </template>
 
 <style scoped>

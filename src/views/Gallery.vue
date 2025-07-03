@@ -34,44 +34,43 @@ onMounted(() => {
 
 <template>
     <div class="p-4 overflow-x-hidden h-full touch-pan-y">
-        <div v-if="operationMedia" class="flex flex-col gap-4">
-            <div v-for="operation in operationMedia" class="pb-4">
-                <div class="text-xl">
-                    {{ new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit', }).format(new
-                        Date(operation.starttime)) }}
-                </div>
-                <div>
-                    {{ operation.procedure }}
-                </div>
-                <br>
-                <Fancybox :options="FancyBoxOptions">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-                        <div v-for="event in operation.events.filter((e: Object) => (e.hasOwnProperty('image') || e.hasOwnProperty('video')))"
-                            class="flex flex-col m-2 p-4 border-white border rounded-lg"
-                            :class="{ 'col-span-2': event.hasOwnProperty('video'), 'sm:col-span-1': event.hasOwnProperty('video') }">
-                            <div v-if="event.hasOwnProperty('image')" class="flex flex-col justify-between gap-2">
-                                <Image />
-                                <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
-                                    <img :src="event.image">
-                                </a>
-                            </div>
-                            <div v-else-if="event.hasOwnProperty('video')" class="flex flex-col gap-2 relative">
-                                <VideoCamera />
-                                <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
-                                    <img class="border-white border-2 rounded-lg" src="/src/assets/Graphic-Content.svg">
-                                </a>
-                            </div>
-                            <div class="pt-4">{{ event.description }}</div>
-                        </div>
+        <LoadingComponent :isLoading="operationMedia == null">
+            <div class="flex flex-col gap-4">
+                <div v-for="operation in operationMedia" class="pb-4">
+                    <div class="text-xl">
+                        {{ new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit', }).format(new
+                            Date(operation.starttime)) }}
                     </div>
-                </Fancybox>
-                <br>
-                <hr>
+                    <div>
+                        {{ operation.procedure }}
+                    </div>
+                    <br>
+                    <Fancybox :options="FancyBoxOptions">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                            <div v-for="event in operation.events.filter((e: Object) => (e.hasOwnProperty('image') || e.hasOwnProperty('video')))"
+                                class="flex flex-col m-2 p-4 border-white border rounded-lg"
+                                :class="{ 'col-span-2': event.hasOwnProperty('video'), 'sm:col-span-1': event.hasOwnProperty('video') }">
+                                <div v-if="event.hasOwnProperty('image')" class="flex flex-col justify-between gap-2">
+                                    <Image />
+                                    <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
+                                        <img :src="event.image">
+                                    </a>
+                                </div>
+                                <div v-else-if="event.hasOwnProperty('video')" class="flex flex-col gap-2 relative">
+                                    <VideoCamera />
+                                    <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
+                                        <img class="border-white border-2 rounded-lg" src="/src/assets/Graphic-Content.svg">
+                                    </a>
+                                </div>
+                                <div class="pt-4">{{ event.description }}</div>
+                            </div>
+                        </div>
+                    </Fancybox>
+                    <br>
+                    <hr>
+                </div>
             </div>
-        </div>
-        <div v-else class="flex h-full">
-            <LoadingComponent />
-        </div>
+        </LoadingComponent>
     </div>
 </template>
 

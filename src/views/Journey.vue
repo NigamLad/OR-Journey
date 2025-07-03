@@ -130,28 +130,26 @@ onMounted(() => {
 
 <template>
     <div class="p-4 overflow-x-hidden touch-pan-y full-height-container flex flex-col">
-        <div v-if="operationInfo" class="flex flex-col h-full">
-            <div id="testLayout" class="h-full relative">
-                <Transition :name="isDragging ? '' : 'fade'">
-                    <div v-show="!isExpandedView" class="h-1/2" :class="{ 'no-transition': isDragging }">
-                        <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex"
-                            @navigate="(index, direction) => goToEvent(index, direction)" />
+        <LoadingComponent :isLoading="operationInfo == null">
+            <div v-if="operationInfo" class="flex flex-col h-full">
+                <div class="h-full relative">
+                    <Transition :name="isDragging ? '' : 'fade'">
+                        <div v-show="!isExpandedView" class="h-1/2" :class="{ 'no-transition': isDragging }">
+                            <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex"
+                                @navigate="(index, direction) => goToEvent(index, direction)" />
+                        </div>
+                    </Transition>
+                    <div class="absolute w-full events-container" :class="{ 'no-transition': isDragging }"
+                        :style="{ height: expandedHeight, bottom: '0' }">
+                        <EventSlideshow :events="operationInfo.events" :currentEventIndex="currentEventIndex"
+                            :transitionDirection="lastTransitionDirection"
+                            @update:currentEventIndex="currentEventIndex = $event"
+                            @navigate="(index, direction) => goToEvent(index, direction)" @toggle-view="toggleView"
+                            @expand-progress="handleExpandProgress" v-model:isExpandedView="isExpandedView" />
                     </div>
-                </Transition>
-                <div class="absolute w-full events-container" :class="{ 'no-transition': isDragging }"
-                    :style="{ height: expandedHeight, bottom: '0' }">
-                    <EventSlideshow :events="operationInfo.events" :currentEventIndex="currentEventIndex"
-                        :transitionDirection="lastTransitionDirection"
-                        @update:currentEventIndex="currentEventIndex = $event"
-                        @navigate="(index, direction) => goToEvent(index, direction)" @toggle-view="toggleView"
-                        @expand-progress="handleExpandProgress" v-model:isExpandedView="isExpandedView" />
                 </div>
             </div>
-
-        </div>
-        <div v-else class="flex h-full">
-            <LoadingComponent />
-        </div>
+        </LoadingComponent>
     </div>
 </template>
 
