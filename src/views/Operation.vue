@@ -99,7 +99,7 @@ function expandAllEvents() {
 </script>
 
 <template>
-    <div ref="scrollArea" @scroll="(e) => scrollListener(e)" class="p-4 overflow-x-hidden touch-pan-y">
+    <div ref="scrollArea" @scroll="(e) => scrollListener(e)" class="h-full p-4 overflow-x-hidden touch-pan-y">
         <Transition name="fade" mode="out-in">
             <ScrollToTop v-if="!atTop && !isLargeScreen" @click="scrollToTop()" />
         </Transition>
