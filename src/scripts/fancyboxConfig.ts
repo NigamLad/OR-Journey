@@ -18,7 +18,7 @@ async function downloadFile(url: string) {
     }
 }
 
-export const FancyBoxOptions: FancyboxOptionsType = {
+export const FancyBoxOptions = {
     Carousel: {
         infinite: false,
     },
@@ -35,4 +35,4 @@ export const FancyBoxOptions: FancyboxOptionsType = {
             right: ['iterateZoom', 'fullscreen', 'close']
         }
     }
-}
+} as const

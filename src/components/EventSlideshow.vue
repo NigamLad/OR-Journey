@@ -51,6 +51,22 @@ const isDragging = ref(false);
 const isTransitioning = ref(false);
 const transitionName = ref('slide-fade');
 const descMarqueeDistance = ref('0');
+
+// Card-wide swipe functionality state
+const isCardDragging = ref(false);
+const cardDragStartY = ref(0);
+const cardDragStartX = ref(0);
+const cardDragProgress = ref(0);
+const cardDragThreshold = 100;
+const cardDragDirection = ref(0); // Store final drag direction: positive = down, negative = up
+const horizontalDragDirection = ref(0); // Store horizontal drag direction: positive = right, negative = left
+const horizontalSwipeThreshold = 100; // Pixels required for navigation swipe
+const swipeType = ref<'vertical' | 'horizontal' | 'none'>('none'); // Track the type of swipe gesture
+const cardRef = ref<HTMLDivElement | null>(null);
+const scrollableContentRef = ref<HTMLDivElement | null>(null);
+const isContentScrollable = ref(false);
+const isAtScrollTop = ref(true); // Track if we're at the top of scrollable content
+
 let titleObserver: MutationObserver | null = null;
 let descriptionObserver: MutationObserver | null = null;
 
@@ -202,9 +218,11 @@ function handleExpandProgress(pixelDistance: number) {
     if (pixelDistance === 9999) {
         // Complete expansion
         isDragging.value = false;
+        isExpandedView.value = true;
     } else if (pixelDistance === -9999) {
-        // Cancel expansion
+        // Complete collapse
         isDragging.value = false;
+        isExpandedView.value = false;
     } else {
         // Normal dragging in progress
         isDragging.value = pixelDistance !== 0;
@@ -335,6 +353,26 @@ function setupDescriptionObserver() {
     }
 }
 
+// Setup MutationObserver to monitor title changes
+function setupTitleObserver() {
+    // Disconnect any existing observer
+    if (titleObserver) {
+        titleObserver.disconnect();
+    }
+
+    if (titleContainerRef.value) {
+        // Create a new observer to watch for content changes in the title container
+        titleObserver = new MutationObserver(checkTitleOverflow);
+
+        // Observe content changes, child changes, and subtree changes
+        titleObserver.observe(titleContainerRef.value, {
+            characterData: true,
+            childList: true,
+            subtree: true
+        });
+    }
+}
+
 // Utility function to setup description animation
 function setupDescriptionAnimation() {
     // Reset animation state
@@ -449,6 +487,13 @@ watch(() => isExpandedView.value, (newVal) => {
         // When collapsing, check for description overflow after the transition completes
         setTimeout(() => {
             setupDescriptionAnimation();
+            checkScrollability(); // Also check scrollability after collapse
+            
+            // Reset scroll position to top when collapsing
+            if (scrollableContentRef.value) {
+                scrollableContentRef.value.scrollTop = 0;
+                isAtScrollTop.value = true;
+            }
         }, 500); // Increased wait time to match the transition duration
     }
 });
@@ -457,25 +502,24 @@ watch(() => isExpandedView.value, (newVal) => {
 function handleResize() {
     setupTitleAnimation();
     setupDescriptionAnimation();
+    checkScrollability();
 }
 
-// Setup MutationObserver to monitor title changes
-function setupTitleObserver() {
-    // Disconnect any existing observer
-    if (titleObserver) {
-        titleObserver.disconnect();
+// Check if content is scrollable
+function checkScrollability() {
+    if (scrollableContentRef.value) {
+        const element = scrollableContentRef.value;
+        isContentScrollable.value = element.scrollHeight > element.clientHeight;
+        // Also check if we're at the top with more precise detection
+        isAtScrollTop.value = element.scrollTop <= 1;
     }
+}
 
-    if (titleContainerRef.value) {
-        // Create a new observer to watch for content changes in the title container
-        titleObserver = new MutationObserver(checkTitleOverflow);
-
-        // Observe content changes, child changes, and subtree changes
-        titleObserver.observe(titleContainerRef.value, {
-            characterData: true,
-            childList: true,
-            subtree: true
-        });
+// Handle scroll events to track position
+function handleScroll() {
+    if (scrollableContentRef.value) {
+        const element = scrollableContentRef.value;
+        isAtScrollTop.value = element.scrollTop <= 1;
     }
 }
 
@@ -494,6 +538,15 @@ onMounted(() => {
                 setupTitleAnimation();
                 setupDescriptionAnimation();
             }
+            
+            // Check if content is scrollable after initial render
+            checkScrollability();
+            
+            // Also set up the initial scroll position check
+            if (scrollableContentRef.value) {
+                scrollableContentRef.value.scrollTop = 0; // Ensure we start at the top
+                isAtScrollTop.value = true;
+            }
         });
 
         // Add resize listener to handle viewport changes
@@ -504,6 +557,12 @@ onMounted(() => {
 // Clean up event listeners when component is destroyed
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
+
+    // Clean up card drag listeners if they exist
+    window.removeEventListener('mousemove', onCardDragMove);
+    window.removeEventListener('touchmove', onCardDragMove);
+    window.removeEventListener('mouseup', onCardDragEnd);
+    window.removeEventListener('touchend', onCardDragEnd);
 
     // Disconnect MutationObservers
     if (titleObserver) {
@@ -542,6 +601,424 @@ function startCoordinatedAnimationSequence() {
         }, 500); // Wait for container to fully expand
     }, 200); // Small initial delay
 }
+
+// Handle card drag start
+function handleCardDragStart(event: TouchEvent) {
+    // Only activate on primary touch (usually the first finger)
+    if (event.touches.length === 1) {
+        isCardDragging.value = true;
+        cardDragStartY.value = event.touches[0].clientY;
+        cardDragProgress.value = 0;
+
+        // Prevent default to avoid scrolling while dragging
+        event.preventDefault();
+    }
+}
+
+// Handle card drag move
+function handleCardDragMove(event: TouchEvent) {
+    if (isCardDragging.value) {
+        const deltaY = event.touches[0].clientY - cardDragStartY.value;
+        cardDragProgress.value = deltaY;
+
+        // Apply drag distance to card's transform
+        if (cardRef.value) {
+            cardRef.value.style.transform = `translateY(${deltaY}px)`;
+        }
+
+        // Prevent default to avoid scrolling while dragging
+        event.preventDefault();
+    }
+}
+
+// Card-wide swipe functionality
+function onCardDragStart(event: MouseEvent | TouchEvent) {
+    // Prevent starting drag on interactive elements that have their own drag functionality
+    const target = event.target as HTMLElement;
+    if (target.closest('button') || 
+        target.closest('input') || 
+        target.closest('a:not([data-fancybox])') ||
+        target.closest('.horizontal-bar') || // Exclude horizontal bar component
+        target.closest('[class*="horizontal"]') || // Exclude any element with "horizontal" in class name
+        target.closest('[data-horizontal-bar]') || // Exclude if has horizontal bar data attribute
+        target.closest('svg') && target.closest('.horizontal-bar')) { // Exclude SVGs within horizontal bar
+        return;
+    }
+
+    // Check if we're interacting with media elements (images/videos)
+    const isMediaElement = target.tagName === 'IMG' || target.tagName === 'VIDEO' || 
+                          target.closest('img') || target.closest('video');
+    
+    // For media elements, we need to distinguish between drag and click
+    if (isMediaElement || target.closest('[data-fancybox]')) {
+        // Track initial position for media elements to detect drag vs click
+        let initialX = 0;
+        let initialY = 0;
+        
+        if (event instanceof MouseEvent) {
+            initialX = event.clientX;
+            initialY = event.clientY;
+        } else if (event.touches?.length) {
+            initialX = event.touches[0].clientX;
+            initialY = event.touches[0].clientY;
+        }
+        
+        // Add temporary listeners to detect movement
+        const moveThreshold = 10; // pixels
+        let hasMoved = false;
+        
+        const mediaIntentHandler = (moveEvent: MouseEvent | TouchEvent) => {
+            let currentX = 0;
+            let currentY = 0;
+            
+            if (moveEvent instanceof MouseEvent) {
+                currentX = moveEvent.clientX;
+                currentY = moveEvent.clientY;
+            } else if (moveEvent.touches?.length) {
+                currentX = moveEvent.touches[0].clientX;
+                currentY = moveEvent.touches[0].clientY;
+            }
+            
+            const deltaX = Math.abs(currentX - initialX);
+            const deltaY = Math.abs(currentY - initialY);
+            
+            if (deltaX > moveThreshold || deltaY > moveThreshold) {
+                hasMoved = true;
+                // This is a drag gesture, prevent Fancybox and start our drag
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                cleanupMediaIntentListeners();
+                
+                // Start our card drag with the original event
+                startCardDrag(event, initialY, initialX);
+            }
+        };
+        
+        const mediaEndHandler = (endEvent: MouseEvent | TouchEvent) => {
+            cleanupMediaIntentListeners();
+            
+            if (!hasMoved) {
+                // This was a click/tap, allow Fancybox to handle it
+                // Don't prevent default, let the event bubble up to Fancybox
+                return;
+            } else {
+                // This was a drag, prevent any click behavior
+                endEvent.preventDefault();
+                endEvent.stopPropagation();
+            }
+        };
+        
+        const cleanupMediaIntentListeners = () => {
+            window.removeEventListener('mousemove', mediaIntentHandler);
+            window.removeEventListener('touchmove', mediaIntentHandler);
+            window.removeEventListener('mouseup', mediaEndHandler);
+            window.removeEventListener('touchend', mediaEndHandler);
+        };
+        
+        // Add listeners for media intent detection
+        window.addEventListener('mousemove', mediaIntentHandler, { passive: false });
+        window.addEventListener('touchmove', mediaIntentHandler, { passive: false });
+        window.addEventListener('mouseup', mediaEndHandler, { passive: false });
+        window.addEventListener('touchend', mediaEndHandler, { passive: false });
+        
+        return; // Exit here for media elements, let intent detection take over
+    }
+
+    // Check if the target is within a scrollable area and if that area is actually scrollable
+    const scrollableParent = target.closest('.scrollable-content');
+    if (scrollableParent) {
+        const isScrollable = scrollableParent.scrollHeight > scrollableParent.clientHeight;
+        
+        // If content is not scrollable, always allow drag gestures
+        if (!isScrollable) {
+            startCardDrag(event);
+            return;
+        }
+        
+        // Content is scrollable, so we need to determine intent based on the simple rules
+        if (isScrollable) {
+            // Get scroll position information
+            const scrollTop = scrollableParent.scrollTop;
+            const isAtTop = scrollTop <= 1; // Very small threshold for "at top"
+            
+            // Get initial touch/mouse position to determine intent
+            let startY = 0;
+            let startX = 0;
+            if (event instanceof MouseEvent) {
+                startY = event.clientY;
+                startX = event.clientX;
+            } else if (event.touches?.length) {
+                startY = event.touches[0].clientY;
+                startX = event.touches[0].clientX;
+            }
+            
+            // Store the start positions for later use in determining drag vs scroll intent
+            cardDragStartY.value = startY;
+            cardDragStartX.value = startX;
+            
+            // Add a temporary listener to determine user intent
+            const intentHandler = (moveEvent: MouseEvent | TouchEvent) => {
+                let currentY = 0;
+                let currentX = 0;
+                if (moveEvent instanceof MouseEvent) {
+                    currentY = moveEvent.clientY;
+                    currentX = moveEvent.clientX;
+                } else if (moveEvent.touches?.length) {
+                    currentY = moveEvent.touches[0].clientY;
+                    currentX = moveEvent.touches[0].clientX;
+                }
+                
+                const deltaY = currentY - startY;
+                const deltaX = currentX - startX;
+                const isVerticalMovement = Math.abs(deltaY) > 5;
+                const isHorizontalMovement = Math.abs(deltaX) > 5;
+                
+                // Check for horizontal swipe first (navigation)
+                if (isHorizontalMovement && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    cleanupIntentListeners();
+                    startCardDrag(event, startY, startX);
+                    return;
+                }
+                
+                // Then check for vertical movement (expand/collapse or scroll)
+                if (isVerticalMovement) {
+                    const isScrollingDown = deltaY > 0;
+                    
+                    // Simple rule: If expanded, at scroll top, and swiping down → collapse
+                    if (isExpandedView.value && isAtTop && isScrollingDown) {
+                        cleanupIntentListeners();
+                        startCardDrag(event, startY, startX);
+                        return;
+                    }
+                    
+                    // Simple rule: If collapsed and swiping up → expand (content shouldn't be scrollable when collapsed)
+                    if (!isExpandedView.value && !isScrollingDown) {
+                        cleanupIntentListeners();
+                        startCardDrag(event, startY, startX);
+                        return;
+                    }
+                    
+                    // Otherwise: allow normal scrolling
+                    cleanupIntentListeners();
+                    return;
+                }
+            };
+            
+            const cleanupIntentListeners = () => {
+                window.removeEventListener('mousemove', intentHandler);
+                window.removeEventListener('touchmove', intentHandler);
+                window.removeEventListener('mouseup', cleanupIntentListeners);
+                window.removeEventListener('touchend', cleanupIntentListeners);
+            };
+            
+            // Add intent detection listeners with passive touch for better performance
+            window.addEventListener('mousemove', intentHandler, { passive: false });
+            window.addEventListener('touchmove', intentHandler, { passive: false });
+            window.addEventListener('mouseup', cleanupIntentListeners);
+            window.addEventListener('touchend', cleanupIntentListeners);
+            
+            return; // Exit early to let intent handler take over
+        }
+    }
+    
+    // No scrollable content or not scrollable, proceed with drag
+    startCardDrag(event);
+}
+
+function startCardDrag(event: MouseEvent | TouchEvent, predeterminedStartY?: number, predeterminedStartX?: number) {
+    isCardDragging.value = true;
+    isDragging.value = true; // Also set the main dragging state to disable transitions
+    swipeType.value = 'none'; // Reset swipe type
+
+    // Get the starting Y and X positions
+    if (predeterminedStartY !== undefined) {
+        cardDragStartY.value = predeterminedStartY;
+    } else if (event instanceof MouseEvent) {
+        cardDragStartY.value = event.clientY;
+    } else if (event.touches?.length) {
+        cardDragStartY.value = event.touches[0].clientY;
+    }
+
+    if (predeterminedStartX !== undefined) {
+        cardDragStartX.value = predeterminedStartX;
+    } else if (event instanceof MouseEvent) {
+        cardDragStartX.value = event.clientX;
+    } else if (event.touches?.length) {
+        cardDragStartX.value = event.touches[0].clientX;
+    }
+
+    // Prevent default to avoid text selection while dragging
+    event.preventDefault();
+
+    // Add event listeners for drag and release
+    window.addEventListener('mousemove', onCardDragMove);
+    window.addEventListener('touchmove', onCardDragMove, { passive: false });
+    window.addEventListener('mouseup', onCardDragEnd);
+    window.addEventListener('touchend', onCardDragEnd);
+}
+
+function onCardDragMove(event: MouseEvent | TouchEvent) {
+    if (!isCardDragging.value) return;
+
+    // Prevent default to avoid scrolling while dragging
+    event.preventDefault();
+
+    // Get current position
+    let currentY = 0;
+    let currentX = 0;
+    if (event instanceof MouseEvent) {
+        currentY = event.clientY;
+        currentX = event.clientX;
+    } else if (event.touches?.length) {
+        currentY = event.touches[0].clientY;
+        currentX = event.touches[0].clientX;
+    }
+
+    // Calculate drag distances in pixels
+    const dragDistanceY = currentY - cardDragStartY.value; // Positive = down, Negative = up
+    const dragDistanceX = currentX - cardDragStartX.value; // Positive = right, Negative = left
+
+    // Determine swipe type if not already determined
+    if (swipeType.value === 'none') {
+        const absY = Math.abs(dragDistanceY);
+        const absX = Math.abs(dragDistanceX);
+        
+        // Require some minimum movement to determine direction
+        if (absY > 10 || absX > 10) {
+            // Determine primary direction based on which has more movement
+            if (absX > absY) {
+                swipeType.value = 'horizontal';
+            } else {
+                swipeType.value = 'vertical';
+            }
+        } else {
+            // Not enough movement yet, continue
+            return;
+        }
+    }
+
+    if (swipeType.value === 'horizontal') {
+        // Handle horizontal swipe for navigation
+        horizontalDragDirection.value = dragDistanceX; // Store horizontal direction
+        const absHorizontalDistance = Math.abs(dragDistanceX);
+        cardDragProgress.value = Math.max(0, Math.min(horizontalSwipeThreshold, absHorizontalDistance));
+        
+        // Visual feedback for horizontal swipe (could be used for navigation preview)
+        emit('expandProgress', 0); // No vertical progress for horizontal swipes
+        
+    } else if (swipeType.value === 'vertical') {
+        // Handle vertical swipe for expand/collapse (existing logic)
+        cardDragDirection.value = dragDistanceY;
+
+        // Enhanced logic for valid drag directions:
+        // - If content is not scrollable: allow all card drag gestures
+        // - If content is scrollable: only allow card drag when at scroll boundaries
+        const scrollableParent = document.querySelector('.scrollable-content') as HTMLElement;
+        const isContentScrollable = scrollableParent ? 
+            scrollableParent.scrollHeight > scrollableParent.clientHeight : false;
+        
+        if (isContentScrollable) {
+            const isAtScrollTop = scrollableParent.scrollTop <= 1;
+            
+            if (isExpandedView.value) {
+                // When expanded with scrollable content:
+                // - Only allow down drag (collapse) when at scroll top
+                // - Block up drag (would interfere with scrolling)
+                if (dragDistanceY > 0 && isAtScrollTop) {
+                    // Down drag allowed when expanded and at scroll top (for collapse)
+                } else {
+                    // Block all other gestures when content is scrollable
+                    return;
+                }
+            } else {
+                // When collapsed, content shouldn't be scrollable, but if it is, only allow up drag
+                if (dragDistanceY < 0) {
+                    // Up drag allowed when collapsed (for expand)
+                } else {
+                    return;
+                }
+            }
+        } else {
+            // Content is not scrollable - allow normal card gestures
+            if (isExpandedView.value) {
+                // When expanded with no overflow: allow both up and down drag
+            } else {
+                // When collapsed: only allow up drag (expand)
+                if (dragDistanceY > 0) {
+                    return;
+                }
+            }
+        }
+
+        // Use absolute value for internal progress tracking, capped at threshold
+        cardDragProgress.value = Math.max(0, Math.min(cardDragThreshold, Math.abs(dragDistanceY)));
+
+        // Emit the drag distance to parent for any visual feedback
+        emit('expandProgress', -dragDistanceY);
+    }
+}
+
+function onCardDragEnd() {
+    if (!isCardDragging.value) return;
+
+    isCardDragging.value = false;
+
+    // Handle different swipe types
+    if (swipeType.value === 'horizontal') {
+        // Handle horizontal navigation swipe
+        if (cardDragProgress.value >= horizontalSwipeThreshold * 0.5) {
+            if (horizontalDragDirection.value > 0) {
+                // Swiped right - go to previous event
+                goToPreviousEvent();
+            } else {
+                // Swiped left - go to next event
+                goToNextEvent();
+            }
+        }
+        
+    } else if (swipeType.value === 'vertical') {
+        // Handle vertical expand/collapse swipe (existing logic)
+        if (cardDragProgress.value >= cardDragThreshold * 0.5) {
+            // We've dragged far enough to trigger a state change
+            // But we need to check if it's in the correct direction
+            if (isExpandedView.value) {
+                // Currently expanded - only collapse on downward drag (positive direction)
+                if (cardDragDirection.value > 0) {
+                    isExpandedView.value = false;
+                    emit('expandProgress', -9999);
+                } else {
+                    // Upward drag when expanded - cancel the action
+                    emit('expandProgress', 0);
+                }
+            } else {
+                // Currently collapsed - only expand on upward drag (negative direction)
+                if (cardDragDirection.value < 0) {
+                    isExpandedView.value = true;
+                    emit('expandProgress', 9999);
+                } else {
+                    // Downward drag when collapsed - cancel the action
+                    emit('expandProgress', 0);
+                }
+            }
+        } else {
+            // Not enough drag, cancel and reset
+            emit('expandProgress', 0);
+        }
+    }
+
+    // Reset states
+    cardDragProgress.value = 0;
+    cardDragDirection.value = 0;
+    horizontalDragDirection.value = 0;
+    swipeType.value = 'none';
+    isDragging.value = false;
+
+    // Clean up event listeners
+    window.removeEventListener('mousemove', onCardDragMove);
+    window.removeEventListener('touchmove', onCardDragMove);
+    window.removeEventListener('mouseup', onCardDragEnd);
+    window.removeEventListener('touchend', onCardDragEnd);
+}
 </script>
 
 <template>
@@ -554,9 +1031,16 @@ function startCoordinatedAnimationSequence() {
                     class="w-full h-full max-w-3xl mx-auto overflow-hidden rounded-2xl flex flex-col"
                     :class="{ 'transition-all duration-400 ease-in-out': !isDragging }">
                     <!-- Main content wrapper -->
-                    <div class="content-wrapper p-4 bg-gradient-to-br from-gray-900 to-gray-800 
-                                rounded-2xl h-full flex flex-col"
-                        :class="{ 'transition-all duration-400': !isDragging }">
+                    <div ref="cardRef"
+                        class="content-wrapper p-4 bg-gradient-to-br from-gray-900 to-gray-800 
+                                rounded-2xl h-full flex flex-col cursor-grab select-none"
+                        :class="{ 
+                            'transition-all duration-400': !isDragging, 
+                            'cursor-grabbing': isCardDragging 
+                        }"
+                        @mousedown="onCardDragStart"
+                        @touchstart="onCardDragStart"
+                        style="touch-action: manipulation;">
                         <!-- Header with event type and time -->
                         <!-- Horizontal bar for expand/collapse -->
                         <div class="flex justify-center">
@@ -594,9 +1078,15 @@ function startCoordinatedAnimationSequence() {
                                 </div>
                             </div>
                         </div> <!-- Content area at the top -->
-                        <div class="flex-grow flex flex-col items-center">
-                            <!-- Non-scrollable content area -->
-                            <div class="w-full">
+                        <div class="flex-grow flex flex-col items-center overflow-hidden">
+                            <!-- Scrollable content area -->
+                            <div ref="scrollableContentRef"
+                                class="w-full h-full overflow-y-auto overflow-x-hidden scrollable-content"
+                                :class="{ 
+                                    'pointer-events-none': isCardDragging,
+                                    'pull-to-collapse-hint': isExpandedView && isAtScrollTop && isContentScrollable
+                                }"
+                                @scroll="handleScroll">
                                 <!-- Event title with marquee animation when text overflows -->
                                 <div class="w-full mb-4 overflow-hidden flex justify-center">
                                     <div ref="titleContainerRef" class="relative max-w-full overflow-hidden"
@@ -616,7 +1106,7 @@ function startCoordinatedAnimationSequence() {
                                         opacity: shouldExpandMediaContainer ? 1 : 0
                                     }" :class="{ 'media-container-expanded': shouldExpandMediaContainer }">
                                     <!-- Image content with Fancybox -->
-                                    <Fancybox v-if="currentEventType === 'image'" :options="FancyBoxOptions"
+                                    <Fancybox v-if="currentEventType === 'image'" :options="FancyBoxOptions as any"
                                         :delegate="'[data-fancybox]'" class="w-full">
                                         <a :href="currentEvent?.image" data-fancybox class="block"> <img
                                                 :src="currentEvent?.image" alt="Event Image" class="rounded-lg object-contain shadow-lg hover:shadow-xl 
@@ -627,7 +1117,7 @@ function startCoordinatedAnimationSequence() {
                                     </Fancybox>
 
                                     <!-- Video content with Fancybox -->
-                                    <Fancybox v-else-if="currentEventType === 'video'" :options="FancyBoxOptions"
+                                    <Fancybox v-else-if="currentEventType === 'video'" :options="FancyBoxOptions as any"
                                         :delegate="'[data-fancybox]'" class="w-full">
                                         <a :href="currentEvent?.video" data-fancybox class="block"> <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
                                                          shadow-white/10 hover:shadow-white/20 w-full
@@ -680,7 +1170,7 @@ function startCoordinatedAnimationSequence() {
 
                         <!-- Navigation controls -->
                         <div
-                            class="sticky bottom-0 flex justify-between items-center mt-auto pt-2 px-2 z-10">
+                            class="sticky bottom-0 flex justify-between items-center mt-auto pt-2 px-2 z-10 navigation-gradient">
                             <!-- Previous button -->
                             <button @click="goToPreviousEvent"
                                 class="px-4 py-2 text-sm rounded-full border border-white flex items-center gap-2 transition-all font-medium sm:px-2 sm:py-1.5"
@@ -778,6 +1268,76 @@ function startCoordinatedAnimationSequence() {
 .content-wrapper::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
+}
+
+/* Scrollable content area styling */
+.scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+    scroll-behavior: smooth;
+    /* Ensure content doesn't get cut off */
+    padding-bottom: 1rem;
+}
+
+.scrollable-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Disable pointer events during card dragging to prevent scroll conflicts */
+.scrollable-content.pointer-events-none {
+    pointer-events: none;
+}
+
+/* Visual hint for pull-to-collapse when at top of scrollable content */
+.scrollable-content.pull-to-collapse-hint {
+    position: relative;
+}
+
+.scrollable-content.pull-to-collapse-hint::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 2px;
+    z-index: 10;
+    animation: pullHint 2s ease-in-out infinite;
+}
+
+@keyframes pullHint {
+    0%, 100% {
+        opacity: 0.3;
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(-50%) translateY(2px);
+    }
+}
+
+/* Navigation controls gradient background for better visibility over scrollable content */
+.navigation-gradient {
+    background: linear-gradient(to top, rgba(31, 41, 55, 0.95) 0%, rgba(31, 41, 55, 0.8) 50%, transparent 100%);
+    backdrop-filter: blur(4px);
 }
 
 /* Title marquee animation */
@@ -882,4 +1442,63 @@ function startCoordinatedAnimationSequence() {
 }
 
 /* Media container animations are applied inline for smoother transitions */
+
+/* Card drag interaction styles */
+.content-wrapper {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.content-wrapper.cursor-grabbing {
+    transform: scale(0.98);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.content-wrapper:active {
+    transform: scale(0.98);
+}
+
+/* Improved drag cursor feedback */
+.cursor-grab {
+    cursor: grab;
+}
+
+.cursor-grabbing {
+    cursor: grabbing;
+    user-select: none;
+}
+
+/* Improved media element interaction */
+[data-fancybox] img,
+[data-fancybox] video {
+    cursor: pointer;
+    touch-action: manipulation;
+    /* Smooth transition for better interaction feedback */
+    transition: transform 0.1s ease-out;
+}
+
+[data-fancybox] img:active,
+[data-fancybox] video:active {
+    transform: scale(0.98);
+}
+
+/* Prevent text selection during drag */
+.select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Horizontal swipe feedback */
+.content-wrapper.horizontal-swipe {
+    transition: transform 0.2s ease-out;
+}
+
+.content-wrapper.horizontal-swipe.swipe-left {
+    transform: translateX(-10px);
+}
+
+.content-wrapper.horizontal-swipe.swipe-right {
+    transform: translateX(10px);
+}
 </style>
