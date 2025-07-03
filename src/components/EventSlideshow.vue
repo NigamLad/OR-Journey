@@ -1170,7 +1170,7 @@ function onCardDragEnd() {
 
                         <!-- Navigation controls -->
                         <div
-                            class="sticky bottom-0 flex justify-between items-center mt-auto pt-2 px-2 z-10 navigation-gradient">
+                            class="sticky bottom-0 flex justify-between items-center mt-auto pt-2 px-2 z-10">
                             <!-- Previous button -->
                             <button @click="goToPreviousEvent"
                                 class="px-4 py-2 text-sm rounded-full border border-white flex items-center gap-2 transition-all font-medium sm:px-2 sm:py-1.5"
@@ -1332,12 +1332,6 @@ function onCardDragEnd() {
         opacity: 0.7;
         transform: translateX(-50%) translateY(2px);
     }
-}
-
-/* Navigation controls gradient background for better visibility over scrollable content */
-.navigation-gradient {
-    background: linear-gradient(to top, rgba(31, 41, 55, 0.95) 0%, rgba(31, 41, 55, 0.8) 50%, transparent 100%);
-    backdrop-filter: blur(4px);
 }
 
 /* Title marquee animation */
