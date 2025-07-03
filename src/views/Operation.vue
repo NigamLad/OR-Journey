@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Ref, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, type Ref, nextTick } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
 import OperationEvent from '../components/OperationEvent.vue';
 import type { Operation } from '@/types';
@@ -36,8 +36,6 @@ const loadOperation = async () => {
     }
 }
 
-const startJourney = ref<HTMLElement | null>(null);
-const exploreProcedure = ref<HTMLElement | null>(null);
 onMounted(() => {
     // Check if the requested operation is in the user's cases
     const userCases = users[state.user?.localAccountId as string].cases;
@@ -45,11 +43,11 @@ onMounted(() => {
         router.push({ path: '/' })
     }
 
-    loadOperation().then(() => {
-        initClickHandler(startJourney.value as HTMLElement)
-        initClickHandler(exploreProcedure.value as HTMLElement)
-    });
+    loadOperation();
+});
 
+onUnmounted(() => {
+    // Cleanup is handled automatically since we're not storing references
 });
 
 function formatHoursToHrsMins(decimalHours: number) {
@@ -118,7 +116,7 @@ function expandAllEvents() {
                             <p class="my-2">{{ operationInfo.description }}</p>
                         </div>
 
-                        <div ref="startJourney" @click="router.push(`/journey/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
+                        <div :ref="(el) => { if (el) initClickHandler(el as HTMLElement) }" @click="router.push(`/journey/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
                             <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
                                 <div>
                                     Start Journey
@@ -127,7 +125,7 @@ function expandAllEvents() {
                             </div>
                         </div>
 
-                        <div ref="exploreProcedure" class="flex items-center justify-center select-none md:col-span-3">
+                        <div :ref="(el) => { if (el) initClickHandler(el as HTMLElement) }" @click="router.push(`/procedure/${props.id}`)" class="flex items-center justify-center select-none md:col-span-3 cursor-pointer">
                             <div class="flex w-full align-center items-center justify-center h-[80px] text-center m-2 p-2 rounded-full border-2 border-white border-solid font-medium pb-2">
                                 <div>
                                     Explore Procedure
@@ -207,36 +205,9 @@ function expandAllEvents() {
                                 </div>
                             </template>
                         </Card>
+                        
                     </div>
                 </div>
-
-                <!-- <div class="lg:h-5/8 lg:flex lg:flex-col">
-                    <div class="pb-4">
-                        <div class="flex justify-between pt-4">
-                            <h1 class="text-2xl">Events</h1>
-                            <div v-if="!isLargeScreen" class="flex gap-8">
-                                <div @click="collapseAllEvents()">
-                                    <CollapseAll />
-                                </div>
-                                <div @click="expandAllEvents()">
-                                    <ExpandAll />
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-                    </div>
-
-                    <div v-if="isLargeScreen" class="h-full">
-                        <InteractiveEvents :events="operationInfo.events" />
-                    </div>
-
-                    <div v-else class="flex flex-col">
-                        <div v-for="event in operationInfo.events">
-                            <OperationEvent :event="event" :collapse="collapseState"/>
-                        </div>
-                    </div>
-                </div> -->
-
             </div>
         </LoadingComponent>
     </div>

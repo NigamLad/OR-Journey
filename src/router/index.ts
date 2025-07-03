@@ -27,6 +27,11 @@ const routes = [
         props: true
     },
     {
+        path: '/procedure/:id',
+        component: lazyLoad("Procedure"),
+        props: true
+    },
+    {
         path: '/journey/:id',
         component: lazyLoad("Journey"),
         props: true
