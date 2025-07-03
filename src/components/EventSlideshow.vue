@@ -15,6 +15,7 @@ declare global {
     interface Window {
         titleOverflowTimer: number;
         descriptionOverflowTimer: number;
+        dragTimeoutId?: number;
     }
 }
 
@@ -223,9 +224,28 @@ function handleExpandProgress(pixelDistance: number) {
         // Complete collapse
         isDragging.value = false;
         isExpandedView.value = false;
+    } else if (pixelDistance === 0) {
+        // Explicitly reset dragging state when no progress
+        isDragging.value = false;
+        // Clear any existing timeout
+        if (window.dragTimeoutId) {
+            clearTimeout(window.dragTimeoutId);
+            window.dragTimeoutId = undefined;
+        }
     } else {
         // Normal dragging in progress
-        isDragging.value = pixelDistance !== 0;
+        isDragging.value = true;
+        
+        // Set a timeout to automatically reset dragging state if it gets stuck
+        if (window.dragTimeoutId) {
+            clearTimeout(window.dragTimeoutId);
+        }
+        window.dragTimeoutId = setTimeout(() => {
+            if (isDragging.value) {
+                isDragging.value = false;
+                emit('expandProgress', 0);
+            }
+        }, 3000); // Reset after 3 seconds if still dragging
     }
 }
 
@@ -563,6 +583,12 @@ onUnmounted(() => {
     window.removeEventListener('touchmove', onCardDragMove);
     window.removeEventListener('mouseup', onCardDragEnd);
     window.removeEventListener('touchend', onCardDragEnd);
+
+    // Clear any pending timeout
+    if (window.dragTimeoutId) {
+        clearTimeout(window.dragTimeoutId);
+        window.dragTimeoutId = undefined;
+    }
 
     // Disconnect MutationObservers
     if (titleObserver) {
@@ -959,7 +985,11 @@ function onCardDragMove(event: MouseEvent | TouchEvent) {
 }
 
 function onCardDragEnd() {
-    if (!isCardDragging.value) return;
+    if (!isCardDragging.value) {
+        // Even if card dragging is false, ensure isDragging is reset
+        isDragging.value = false;
+        return;
+    }
 
     isCardDragging.value = false;
 
@@ -1006,7 +1036,7 @@ function onCardDragEnd() {
         }
     }
 
-    // Reset states
+    // Reset states - ensure isDragging is always reset
     cardDragProgress.value = 0;
     cardDragDirection.value = 0;
     horizontalDragDirection.value = 0;
