@@ -41,10 +41,6 @@ onMounted(() => {
     loadOperation();
 });
 
-onUnmounted(() => {
-    // Cleanup is handled automatically since we're not storing references
-});
-
 const scrollArea = ref();
 const atTop = ref(true);
 function scrollListener(event: Event) {
