@@ -6,6 +6,7 @@ import { users, operations } from '@/scripts/simulatedDB';
 import type { Operation } from '@/types';
 import Fancybox from '@/components/Fancybox.vue';
 import { FancyBoxOptions } from '@/scripts/fancyboxConfig';
+import Media from '@/components/Media.vue';
 import Image from '@/components/icons/image.vue';
 import VideoCamera from '@/components/icons/video-camera.vue';
 
@@ -50,18 +51,16 @@ onMounted(() => {
                             <div v-for="event in operation.events.filter((e: Object) => (e.hasOwnProperty('image') || e.hasOwnProperty('video')))"
                                 class="flex flex-col m-2 p-4 border-white border rounded-lg"
                                 :class="{ 'col-span-2': event.hasOwnProperty('video'), 'sm:col-span-1': event.hasOwnProperty('video') }">
-                                <div v-if="event.hasOwnProperty('image')" class="flex flex-col justify-between gap-2">
-                                    <Image />
-                                    <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
-                                        <img :src="event.image">
-                                    </a>
+                                <!-- Media Type Icon -->
+                                <div class="flex justify-start mb-2">
+                                    <Image v-if="event.hasOwnProperty('image')" />
+                                    <VideoCamera v-else-if="event.hasOwnProperty('video')" />
                                 </div>
-                                <div v-else-if="event.hasOwnProperty('video')" class="flex flex-col gap-2 relative">
-                                    <VideoCamera />
-                                    <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
-                                        <img class="border-white border-2 rounded-lg" src="/src/assets/Graphic-Content.svg">
-                                    </a>
-                                </div>
+                                <Media 
+                                    :url="event.image || event.video"
+                                    :type="event.image ? 'image' : 'video'"
+                                    :contentWarning="event.contentWarning"
+                                />
                                 <div class="pt-4">{{ event.description }}</div>
                             </div>
                         </div>

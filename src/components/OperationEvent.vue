@@ -8,6 +8,7 @@ import VideoCamera from './icons/video-camera.vue';
 import ClipboardPulse from './icons/clipboard-pulse.vue';
 import PlusCircle from './icons/plus-circle.vue';
 import DashCircle from './icons/dash-circle.vue';
+import Media from '@/components/Media.vue';
 
 const props = defineProps<{ 
     event: OperationEvent,
@@ -54,22 +55,15 @@ watch(() => props.collapse, (value) => {
                 <div class="px-1 py-2">
                     <hr>
                     <p class="pb-4">{{ event.description }}</p>
-                    <div class="m-auto select-none sm:w-1/2" v-if="event.image">
+                    <div class="m-auto select-none sm:w-1/2" v-if="event.image || event.video">
                         <Fancybox :options="FancyBoxOptions">
-                            <a data-fancybox="gallery" :data-download-src="event.image" :href="event.image">
-                                <img class="border-white border-2 rounded-lg" :src="event.image">
-                            </a>
+                            <Media 
+                                :url="(event.image || event.video) as string"
+                                :type="event.image ? 'image' : 'video'"
+                                :contentWarning="event.contentWarning"
+                            />
                         </Fancybox>
-                    </div>
-                    <div v-if="event.video" class="m-auto select-none sm:w-1/2">
-                        <div class="relative h-full">
-                            <Fancybox :options="FancyBoxOptions">
-                                <a data-fancybox="gallery" :data-download-src="event.video" :href="event.video">
-                                    <img class="border-white border-2 rounded-lg" src="/src/assets/Graphic-Content.svg">
-                                </a>
-                            </Fancybox>
-                        </div>
-                        <div class="flex w-full pt-4 items-center gap-1">
+                        <div v-if="event.video" class="flex w-full pt-4 items-center gap-1">
                             <img class="object-scale-down" height="40px" width="40px"
                                 src="/src/assets/smartforceps.png">
                             <p v-if="event.forceaverage">Video average force: {{ event.forceaverage }} N</p>

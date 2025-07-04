@@ -9,6 +9,7 @@ import Image from '@/components/icons/image.vue';
 import VideoCamera from '@/components/icons/video-camera.vue';
 import ClipboardPulse from '@/components/icons/clipboard-pulse.vue';
 import HorizontalBar from '@/components/horizontal-bar.vue';
+import Media from '@/components/Media.vue';
 
 // Extend Window interface for timer properties
 declare global {
@@ -822,32 +823,20 @@ function onCardDragEnd() {
                                     ref="mediaContainerRef"
                                     class="flex justify-center w-full overflow-hidden transition-all duration-500 ease-in-out"
                                     :style="{
-                                        maxHeight: shouldExpandMediaContainer ? '50vh' : '0',
+                                        maxHeight: shouldExpandMediaContainer ? '100vh' : '0',
                                         marginBottom: shouldExpandMediaContainer ? '1rem' : '0',
                                         opacity: shouldExpandMediaContainer ? 1 : 0
                                     }" :class="{ 'media-container-expanded': shouldExpandMediaContainer }">
-                                    <!-- Image content with Fancybox -->
-                                    <Fancybox v-if="currentEventType === 'image'" :options="FancyBoxOptions as any"
-                                        :delegate="'[data-fancybox]'" class="w-full">
-                                        <a :href="currentEvent?.image" data-fancybox class="block"> <img
-                                                :src="currentEvent?.image" alt="Event Image" class="rounded-lg object-contain shadow-lg hover:shadow-xl 
-                                                       shadow-white/10 hover:shadow-white/20 w-full
-                                                       opacity-0 transition-all duration-500 ease-out delay-100"
-                                                :class="{ 'opacity-100 hover:scale-[1.02]': shouldAnimateMedia }" />
-                                        </a>
-                                    </Fancybox>
-
-                                    <!-- Video content with Fancybox -->
-                                    <Fancybox v-else-if="currentEventType === 'video'" :options="FancyBoxOptions as any"
-                                        :delegate="'[data-fancybox]'" class="w-full">
-                                        <a :href="currentEvent?.video" data-fancybox class="block"> <video class="rounded-lg object-contain shadow-lg hover:shadow-xl 
-                                                         shadow-white/10 hover:shadow-white/20 w-full
-                                                         opacity-0 transition-all duration-500 ease-out delay-100"
-                                                :class="{ 'opacity-100': shouldAnimateMedia }" controls>
-                                                <source :src="currentEvent?.video" type="video/mp4">
-                                                Your browser does not support video playback.
-                                            </video>
-                                        </a>
+                                    <!-- Media content with Fancybox -->
+                                    <Fancybox :options="FancyBoxOptions as any" :delegate="'[data-fancybox]'" class="w-full">
+                                        <div class="w-full opacity-0 transition-all duration-500 ease-out delay-100"
+                                            :class="{ 'opacity-100': shouldAnimateMedia }">
+                                            <Media 
+                                                :url="(currentEvent?.image || currentEvent?.video) as string"
+                                                :type="currentEvent?.image ? 'image' : 'video'"
+                                                :contentWarning="currentEvent?.contentWarning"
+                                            />
+                                        </div>
                                     </Fancybox>
                                 </div>
                                 

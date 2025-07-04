@@ -46,10 +46,6 @@ onMounted(() => {
     loadOperation();
 });
 
-onUnmounted(() => {
-    // Cleanup is handled automatically since we're not storing references
-});
-
 function formatHoursToHrsMins(decimalHours: number) {
   const hours = Math.floor(decimalHours);
   const mins = Math.round((decimalHours - hours) * 60);
