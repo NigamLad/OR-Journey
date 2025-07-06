@@ -6,6 +6,7 @@ export interface Operation {
     endtime: string;
     skintoskintime: number;
     description: string;
+    summary: string;
     events: OperationEvent[];
 }
 

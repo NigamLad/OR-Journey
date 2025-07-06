@@ -9,6 +9,7 @@ export const operations: Record<string, Operation> = {
         "endtime": "2024-01-23T11:15",
         "skintoskintime": 1.25,
         "description": "You underwent a craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A lesion in the motor strip can cause weakness or paralysis on the body.",
+        "summary": "Your surgery was completed as planned with no unexpected issues arising during the procedure. Your vital signs remained stable throughout, and blood loss was minimal for this type of surgery. The time spent on your operation is typical based on the location, and size of your tumor. Your surgical team removed the entire tumor successfully.",
         "events": [
             { "eventId": "guid_1", "timestamp": "2024-01-23T07:30", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
             { "eventId": "guid_2", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },
@@ -34,6 +35,7 @@ export const operations: Record<string, Operation> = {
         "endtime": "2024-01-23T12:30",
         "skintoskintime": 2.25,
         "description": "You underwent craniotomy, which is a procedure where a temporary window is made in the skull to access and remove your tumor, with the opening being repaired at the end of the surgery. A parafalcine meningioma is a tumor that grows between the brain's two hemispheres. Although typically benign, it can cause seizures, headaches, and other symptoms.",
+        "summary": "Your surgery took longer than expected due to the complexity of the tumor's location and size. During the procedure, there were periods of instability with your vitals, which was managed carefully. Ultimately, your operation was a successful, and the full tumor was removed.",
         "events": [
             { "eventId": "guid_1", "timestamp": "2024-01-23T07:00", "type": "Pre Operative", "eventName": "Arrived at operating room", "description": "You arrived at the operating room to begin your procedure" },
             { "eventId": "guid_2", "timestamp": "2024-01-23T07:45", "type": "Intraoperative", "eventName": "Anesthesia administered", "description": "You were given 11.25 mg of Midazolam as an induction dose, and 1.5 mg per hour to keep you asleep." },

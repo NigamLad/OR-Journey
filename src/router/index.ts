@@ -27,18 +27,23 @@ const routes = [
         props: true
     },
     {
-        path: '/procedure/:id',
-        component: lazyLoad("Procedure"),
-        props: true
-    },
-    {
         path: '/journey/:id',
         component: lazyLoad("Journey"),
         props: true
     },
     {
+        path: '/explore/:id',
+        component: lazyLoad("Explore"),
+        props: true
+    },
+    {
         path: '/gallery',
         component: lazyLoad("Gallery")
+    },
+    {
+        path: '/procedure/:id',
+        component: lazyLoad("Procedure"),
+        props: true
     },
     // {
     //     path: '/planning',
@@ -51,7 +56,7 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory('/'),
     routes
 })
 
