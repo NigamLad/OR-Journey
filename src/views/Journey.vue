@@ -160,6 +160,33 @@ const currentSceneHasMedia = computed(() => {
     return currentSceneEvent.value && (currentSceneEvent.value.image || currentSceneEvent.value.video);
 });
 
+// Computed property to determine if progress bar should be shown (after content warning)
+const showProgressBar = computed(() => {
+    const currentSceneType = scenes.value[currentScene.value]?.type;
+    return currentSceneType !== 'content-warning';
+});
+
+// Computed property to calculate progress including all scenes after content warning
+const eventProgress = computed(() => {
+    if (!operationInfo.value || scenes.value.length === 0) return 0;
+    
+    // Find the content warning scene index
+    const contentWarningIndex = scenes.value.findIndex(scene => scene.type === 'content-warning');
+    
+    // If we're still on content warning, return 0
+    if (currentScene.value <= contentWarningIndex) {
+        return 0;
+    }
+    
+    // Calculate progress based on all scenes after content warning
+    const totalScenesAfterWarning = scenes.value.length - (contentWarningIndex + 1);
+    const currentSceneAfterWarning = currentScene.value - contentWarningIndex;
+    
+    if (totalScenesAfterWarning === 0) return 100;
+    
+    return Math.round((currentSceneAfterWarning / totalScenesAfterWarning) * 100);
+});
+
 // Helper function to get event duration
 const getEventDuration = (event: OperationEvent) => {
     return event.video || event.image ? 5000 : calculateReadingTime(
@@ -546,17 +573,17 @@ onUnmounted(() => {
 
                     <!-- Main Cinematic Experience -->
                     <div v-else key="cinematic" class="relative w-full h-full z-[9999]">
-                        <!-- Progress Bar at Bottom -->
-                        <div class="fixed bottom-0 left-0 w-full z-[10000] bg-black/30 backdrop-blur-sm">
+                        <!-- Progress Bar at Bottom (only show after content warning) -->
+                        <div v-if="showProgressBar" class="fixed bottom-0 left-0 w-full z-[10000] bg-black/30 backdrop-blur-sm">
                             <div class="relative w-full h-3 bg-white/20">
                                 <div 
                                     class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500 ease-out shadow-lg" 
-                                    :style="{ width: `${(currentScene + 1) / scenes.length * 100}%` }"
+                                    :style="{ width: `${eventProgress}%` }"
                                 ></div>
                                 <!-- Percentage Text -->
                                 <div class="absolute inset-0 flex items-center justify-center">
                                     <span class="text-white text-xs font-medium drop-shadow-lg">
-                                        {{ Math.round((currentScene + 1) / scenes.length * 100) }}%
+                                        {{ eventProgress }}%
                                     </span>
                                 </div>
                             </div>
