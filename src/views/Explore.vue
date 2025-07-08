@@ -131,8 +131,9 @@ onMounted(() => {
 <template>
     <div class="p-4 overflow-x-hidden touch-pan-y full-height-container flex flex-col">
         <LoadingComponent :isLoading="operationInfo == null">
-            <div v-if="operationInfo" class="flex flex-col h-full">
-                <div class="h-full relative">
+            <div v-if="operationInfo" class="flex flex-col lg:flex-row h-full gap-4">
+                <!-- Mobile/Tablet Layout (existing behavior) -->
+                <div class="h-full relative lg:hidden">
                     <Transition :name="isDragging ? '' : 'fade'">
                         <div v-show="!isExpandedView" class="h-1/2" :class="{ 'no-transition': isDragging }">
                             <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex"
@@ -146,6 +147,24 @@ onMounted(() => {
                             @update:currentEventIndex="currentEventIndex = $event"
                             @navigate="(index, direction) => goToEvent(index, direction)" @toggle-view="toggleView"
                             @expand-progress="handleExpandProgress" v-model:isExpandedView="isExpandedView" />
+                    </div>
+                </div>
+
+                <!-- Desktop Layout (lg and above) -->
+                <div class="hidden lg:flex w-full h-full">
+                    <!-- Left side - Clock -->
+                    <div class="flex-1 pr-2">
+                        <ClockNavigation :events="operationInfo.events" :currentIndex="currentEventIndex"
+                            @navigate="(index, direction) => goToEvent(index, direction)" />
+                    </div>
+                    
+                    <!-- Right side - Events (always expanded) -->
+                    <div class="flex-1 pl-2">
+                        <EventSlideshow :events="operationInfo.events" :currentEventIndex="currentEventIndex"
+                            :transitionDirection="lastTransitionDirection"
+                            @update:currentEventIndex="currentEventIndex = $event"
+                            @navigate="(index, direction) => goToEvent(index, direction)" @toggle-view="toggleView"
+                            @expand-progress="handleExpandProgress" :isExpandedView="true" :disableCollapse="true" />
                     </div>
                 </div>
             </div>
@@ -200,6 +219,18 @@ onMounted(() => {
 /* Disable transitions during active dragging for more responsive feel */
 .no-transition {
     transition: none !important;
+}
+
+/* Desktop layout enhancements */
+@media (min-width: 1024px) {
+    .full-height-container {
+        padding: 1rem;
+    }
+    
+    /* Ensure equal height for both sides */
+    .lg\:flex > div {
+        height: 100%;
+    }
 }
 
 @keyframes fadeIn {

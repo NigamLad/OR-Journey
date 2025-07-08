@@ -25,6 +25,7 @@ const props = defineProps<{
     currentEventIndex?: number // Allow parent to control currentEventIndex
     isExpandedView?: boolean // Allow parent to control expanded view state
     transitionDirection?: 'next' | 'prev' | 'direct' // Direction for the transition animation
+    disableCollapse?: boolean // Disable collapse functionality (for desktop)
 }>()
 
 const emit = defineEmits<{
@@ -66,6 +67,7 @@ const cardRef = ref<HTMLDivElement | null>(null);
 const scrollableContentRef = ref<HTMLDivElement | null>(null);
 const isContentScrollable = ref(false);
 const isAtScrollTop = ref(true); // Track if we're at the top of scrollable content
+const isSwipingUp = ref(false); // Track when user is swiping up to hide the indicator
 
 let titleObserver: MutationObserver | null = null;
 let descriptionObserver: MutationObserver | null = null;
@@ -509,6 +511,11 @@ function startCoordinatedAnimationSequence() {
 
 // Card-wide swipe functionality
 function onCardDragStart(event: MouseEvent | TouchEvent) {
+    // Disable drag functionality when collapse is disabled
+    if (props.disableCollapse) {
+        return;
+    }
+    
     const target = event.target as HTMLElement;
     
     // Prevent starting drag on interactive elements
@@ -656,6 +663,11 @@ function onCardDragMove(event: MouseEvent | TouchEvent) {
         
         if (absY > 10 || absX > 10) {
             swipeType.value = absX > absY ? 'horizontal' : 'vertical';
+            
+            // If it's a vertical swipe upward (negative dragDistanceY), hide the swipe indicator
+            if (swipeType.value === 'vertical' && dragDistanceY < 0) {
+                isSwipingUp.value = true;
+            }
         } else {
             return;
         }
@@ -667,6 +679,11 @@ function onCardDragMove(event: MouseEvent | TouchEvent) {
         emit('expandProgress', 0);
     } else if (swipeType.value === 'vertical') {
         cardDragDirection.value = dragDistanceY;
+
+        // Continue tracking upward swipe
+        if (dragDistanceY < 0) {
+            isSwipingUp.value = true;
+        }
 
         if (!isValidVerticalDrag(dragDistanceY)) return;
 
@@ -733,6 +750,7 @@ function onCardDragEnd() {
     horizontalDragDirection.value = 0;
     swipeType.value = 'none';
     isDragging.value = false;
+    isSwipingUp.value = false; // Reset swipe up indicator state
 
     // Clean up event listeners
     window.removeEventListener('mousemove', onCardDragMove);
@@ -763,7 +781,7 @@ function onCardDragEnd() {
                         @touchstart="onCardDragStart"
                         style="touch-action: manipulation;">
                         <!-- Horizontal bar for expand/collapse -->
-                        <div class="flex justify-center">
+                        <div v-if="!props.disableCollapse" class="flex justify-center">
                             <HorizontalBar v-model:is-expanded="isExpandedView" @click="emit('toggle-view')"
                                 @expand-progress="handleExpandProgress" class="transition-all hover:opacity-80" />
                         </div>
@@ -803,8 +821,7 @@ function onCardDragEnd() {
                             <div ref="scrollableContentRef"
                                 class="w-full h-full overflow-y-auto overflow-x-hidden scrollable-content"
                                 :class="{ 
-                                    'pointer-events-none': isCardDragging,
-                                    'pull-to-collapse-hint': isExpandedView && isAtScrollTop && isContentScrollable
+                                    'pointer-events-none': isCardDragging
                                 }"
                                 @scroll="handleScroll">
                                 <!-- Event title with marquee animation when text overflows -->
@@ -877,6 +894,21 @@ function onCardDragEnd() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Swipe up hint for media content -->
+                        <div v-if="!isExpandedView && ['image', 'video'].includes(currentEventType as string)"
+                            class="flex justify-center mb-2 opacity-60 transition-opacity duration-300"
+                            :class="{ 'opacity-0': isSwipingUp }">
+                            <div class="swipe-up-container">
+                                <svg class="chevron-left" viewBox="0 0 24 12" width="24" height="12">
+                                    <polyline points="2,10 12,2 22,10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="swipe-text">Swipe up for more</span>
+                                <svg class="chevron-right" viewBox="0 0 24 12" width="24" height="12">
+                                    <polyline points="2,10 12,2 22,10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </div>
                         </div>
 
@@ -1016,36 +1048,6 @@ function onCardDragEnd() {
     pointer-events: none;
 }
 
-/* Visual hint for pull-to-collapse when at top of scrollable content */
-.scrollable-content.pull-to-collapse-hint {
-    position: relative;
-}
-
-.scrollable-content.pull-to-collapse-hint::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    border-radius: 2px;
-    z-index: 10;
-    animation: pullHint 2s ease-in-out infinite;
-}
-
-@keyframes pullHint {
-    0%, 100% {
-        opacity: 0.3;
-        transform: translateX(-50%) translateY(0);
-    }
-    50% {
-        opacity: 0.7;
-        transform: translateX(-50%) translateY(2px);
-    }
-}
-
 /* Title marquee animation */
 @keyframes marquee {
     0%, 15% {
@@ -1135,5 +1137,45 @@ function onCardDragEnd() {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+/* Swipe up indicator animation */
+.swipe-up-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    animation: swipeUpMotion 4s ease-in-out infinite;
+}
+
+.chevron-left,
+.chevron-right {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.swipe-text {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes swipeUpMotion {
+    0% {
+        transform: translateY(0);
+    }
+    16.67% {
+        transform: translateY(-8px);
+    }
+    33.33% {
+        transform: translateY(0);
+    }
+    33.34%, 100% {
+        transform: translateY(0);
+    }
 }
 </style>
