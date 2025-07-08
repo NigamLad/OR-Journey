@@ -262,10 +262,10 @@ const startTimeTransition = (fromTime: string, toTime: string, fromEventIndex: n
     
     const startTimestamp = new Date(fromTime).getTime();
     const endTimestamp = new Date(toTime).getTime();
-    const totalDuration = 4000; // 4 seconds total (1.5s animation + 1.5s display + 1s fade out)
-    const animationDuration = 1500; // Clock animation duration (faster)
-    const displayDuration = 1500; // Time to display final time
-    const fadeOutDuration = 1000; // Fade out duration
+    const totalDuration = 2500; // Reduced from 4000 to 2500
+    const animationDuration = 1000; // Reduced from 1500 to 1000
+    const displayDuration = 1000; // Reduced from 1500 to 1000
+    const fadeOutDuration = 500; // Reduced from 1000 to 500
     
     // Initialize with the starting time
     displayedTime.value = new Date(fromTime).toLocaleTimeString('en-US', { 
@@ -425,34 +425,34 @@ const nextScene = () => {
                 // For skipped content, show continue button immediately
                 showClickToContinue.value = true;
             } else {
-                const duration = scene.duration || 3000;
+                // Calculate when animations actually complete instead of using scene duration
                 
                 if (currentSceneHasMedia.value) {
-                    // For media scenes, wait for all animations to complete (6s start + 1.5s duration = 7.5s) plus buffer
+                    // For media scenes: media content finishes at 2.5s + 0.8s = 3.3s
                     setTimeout(() => {
                         showClickToContinue.value = true;
-                    }, Math.max(duration, 8000)); // Ensure at least 8 seconds for media animations to complete
+                    }, 3400); // 3.3s + 100ms buffer
                 } else {
-                    // For text scenes, wait for description animation to complete (4s start + 1.5s duration = 5.5s) plus buffer
+                    // For text scenes, wait for description animation to complete
                     if (scene.content && scene.type !== 'time-transition') {
-                        // Has description, wait for it to finish animating
+                        // Has description: finishes at 1.8s + 0.8s = 2.6s
                         setTimeout(() => {
                             showClickToContinue.value = true;
-                        }, Math.max(duration, 6000)); // Ensure at least 6 seconds for text animations to complete
+                        }, 2700); // 2.6s + 100ms buffer
                     } else if (scene.type === 'team-intro') {
-                        // Team intro scene with surgical team list, wait for animations to complete
+                        // Team intro: last surgeon finishes at 3.0s + 0.6s = 3.6s
                         setTimeout(() => {
                             showClickToContinue.value = true;
-                        }, Math.max(duration, 6000)); // Wait for team animations to complete
+                        }, 3700); // 3.6s + 100ms buffer
                     } else {
-                        // No description or time transition, show timer and auto-advance
-                        startTimer(duration, () => {
-                            nextScene();
-                        });
+                        // Only title and subtitle: subtitle finishes at 1.0s + 0.8s = 1.8s
+                        setTimeout(() => {
+                            showClickToContinue.value = true;
+                        }, 1900); // 1.8s + 100ms buffer
                     }
                 }
             }
-        }, 1200); // Synchronized with fade-out animation duration
+        }, 400); // Reduced from 800 to 400
     } else {
         // Journey complete - trigger final fade-out
         isFadingOut.value = true;
@@ -460,7 +460,7 @@ const nextScene = () => {
         temporaryViewActive.value = false;
         setTimeout(() => {
             router.push(`/operation/${props.id}`);
-        }, 1200); // Allow for final fade out
+        }, 400); // Reduced from 800 to 400
     }
 }
 
@@ -546,13 +546,19 @@ onUnmounted(() => {
 
                     <!-- Main Cinematic Experience -->
                     <div v-else key="cinematic" class="relative w-full h-full z-[9999]">
-                        <!-- Progress Bar at Top -->
-                        <div class="fixed top-0 left-0 w-full z-[10000]">
-                            <div class="w-full h-1 bg-white bg-opacity-10">
+                        <!-- Progress Bar at Bottom -->
+                        <div class="fixed bottom-0 left-0 w-full z-[10000] bg-black/30 backdrop-blur-sm">
+                            <div class="relative w-full h-3 bg-white/20">
                                 <div 
-                                    class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500 ease-out" 
+                                    class="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500 ease-out shadow-lg" 
                                     :style="{ width: `${(currentScene + 1) / scenes.length * 100}%` }"
                                 ></div>
+                                <!-- Percentage Text -->
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-white text-xs font-medium drop-shadow-lg">
+                                        {{ Math.round((currentScene + 1) / scenes.length * 100) }}%
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -613,7 +619,7 @@ onUnmounted(() => {
 
                     <!-- Scene Content -->
                     <Transition name="scene" mode="out-in" :key="currentScene">
-                        <div v-if="scenes[currentScene]" class="relative w-full h-full flex flex-col items-center justify-center text-center p-8 pt-12" :class="`scene-${scenes[currentScene].type}`">
+                        <div v-if="scenes[currentScene]" class="relative w-full h-full flex flex-col items-center justify-center text-center" :class="[`scene-${scenes[currentScene].type}`, scenes[currentScene].type === 'content-warning' ? '' : 'p-8 pt-12']">
                             <!-- Scene Content -->
                             <div class="relative z-[9999] max-w-6xl w-full h-full flex flex-col" 
                                  :class="{ 
@@ -621,7 +627,7 @@ onUnmounted(() => {
                                      'justify-center items-center': !currentSceneEvent || (!currentSceneEvent.image && !currentSceneEvent.video)
                                  }">
                                 <!-- Main Content Area -->
-                                <div class="flex-grow flex flex-col justify-center items-center overflow-y-auto">
+                                <div class="flex-grow flex flex-col justify-center items-center" :class="scenes[currentScene].type === 'content-warning' ? 'min-h-screen' : 'overflow-y-auto'">
                                     <!-- Title with dramatic entrance -->
                                     <h1 v-if="scenes[currentScene].type !== 'content-warning' && scenes[currentScene].type !== 'time-transition'" class="scene-title text-white font-bold mb-4" :class="{ 'animate-title': isPlaying }">
                                         {{ scenes[currentScene].title }}
@@ -748,9 +754,9 @@ onUnmounted(() => {
                                     </div>
 
                                     <!-- Content Warning Decision Buttons -->
-                                    <div v-if="scenes[currentScene].type === 'content-warning'" class="flex items-center justify-center min-h-screen w-full px-4">
+                                    <div v-if="scenes[currentScene].type === 'content-warning'" class="absolute inset-0 flex items-center justify-center px-4 py-8 z-[10000]">
                                         <!-- Glass Card Container -->
-                                        <div class="glass-card p-6 sm:p-8 rounded-2xl backdrop-blur-md bg-black/60 border border-white/20 shadow-2xl max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto">
+                                        <div class="glass-card p-6 sm:p-8 rounded-2xl backdrop-blur-md bg-black/60 border border-white/20 shadow-2xl max-w-2xl w-full mx-auto">
                                             <!-- Title and Subtitle inside the card -->
                                             <h1 class="text-white font-bold mb-4 text-2xl sm:text-3xl md:text-4xl text-center">
                                                 {{ scenes[currentScene].title }}
@@ -1037,7 +1043,7 @@ onUnmounted(() => {
     overflow: hidden;
     opacity: 0;
     transform: translateY(40px) scale(0.9);
-    animation: glassCardEnter 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: glassCardEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Reduced from 1s to 0.6s */
 }
 
 @keyframes glassCardEnter {
@@ -1079,7 +1085,7 @@ onUnmounted(() => {
 }
 
 .animate-title {
-    animation: slideInFadeEnhanced 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: slideInFadeEnhanced 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Reduced from 1.5s to 0.8s */
 }
 
 .scene-subtitle {
@@ -1089,7 +1095,7 @@ onUnmounted(() => {
 }
 
 .animate-subtitle {
-    animation: slideInFadeEnhanced 1.5s cubic-bezier(0.4, 0, 0.2, 1) 2.0s forwards;
+    animation: slideInFadeEnhanced 0.8s cubic-bezier(0.4, 0, 0.2, 1) 1.0s forwards; /* Reduced delay from 2.0s to 1.0s */
 }
 
 .scene-description {
@@ -1099,14 +1105,14 @@ onUnmounted(() => {
 }
 
 .animate-description {
-    animation: slideInFadeEnhanced 1.5s cubic-bezier(0.4, 0, 0.2, 1) 4.0s forwards;
+    animation: slideInFadeEnhanced 0.8s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards; /* Reduced delay from 4.0s to 1.8s */
 }
 
 /* Media Content Animation */
 .media-content {
     opacity: 0;
     transform: translateY(30px) scale(0.9);
-    animation: slideInFadeEnhanced 1.5s cubic-bezier(0.4, 0, 0.2, 1) 6.0s forwards;
+    animation: slideInFadeEnhanced 0.8s cubic-bezier(0.4, 0, 0.2, 1) 2.5s forwards; /* Reduced delay from 6.0s to 2.5s */
 }
 
 /* Surgical Team List Animation */
@@ -1116,38 +1122,38 @@ onUnmounted(() => {
 }
 
 .animate-team-list {
-    animation: slideInFadeEnhanced 1.5s cubic-bezier(0.4, 0, 0.2, 1) 4.0s forwards;
+    animation: slideInFadeEnhanced 0.8s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards; /* Reduced delay from 4.0s to 1.8s */
 }
 
 /* Individual surgeon animations with staggered delays */
 .animate-surgeon-0 {
     opacity: 0;
     transform: translateX(-40px);
-    animation: slideInFromLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) 5.0s forwards;
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.2s forwards; /* Reduced duration and delay */
 }
 
 .animate-surgeon-1 {
     opacity: 0;
     transform: translateX(-40px);
-    animation: slideInFromLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) 5.2s forwards;
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.4s forwards; /* Reduced duration and delay */
 }
 
 .animate-surgeon-2 {
     opacity: 0;
     transform: translateX(-40px);
-    animation: slideInFromLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) 5.4s forwards;
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.6s forwards; /* Reduced duration and delay */
 }
 
 .animate-surgeon-3 {
     opacity: 0;
     transform: translateX(-40px);
-    animation: slideInFromLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) 5.6s forwards;
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.8s forwards; /* Reduced duration and delay */
 }
 
 .animate-surgeon-4 {
     opacity: 0;
     transform: translateX(-40px);
-    animation: slideInFromLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) 5.8s forwards;
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) 3.0s forwards; /* Reduced duration and delay */
 }
 
 /* Fade out classes for dramatic scene endings */
@@ -1157,7 +1163,7 @@ onUnmounted(() => {
 .scene-fade-out .media-content,
 .scene-fade-out .glass-card,
 .scene-fade-out .surgical-team-list {
-    animation: fadeOutDownEnhanced 1.2s ease-out forwards;
+    animation: fadeOutDownEnhanced 0.8s ease-out forwards; /* Reduced from 1.2s to 0.8s */
     will-change: opacity, filter;
 }
 
