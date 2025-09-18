@@ -7,7 +7,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    duration: 600
+    duration: 300
 });
 
 const showContent = ref(false);
@@ -53,7 +53,7 @@ onMounted(() => {
   width: 3em;
   height: 3em;
   background: linear-gradient(-45deg, #623e59 0%, #34695d 100% );
-  animation: spin 3s infinite;
+  animation: spin 2.5s infinite;
   border-radius: 10%;
 }
 
@@ -85,7 +85,7 @@ onMounted(() => {
 /* Fade transition styles */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.6s ease-in-out;
+    transition: opacity 0.4s ease-in-out;
 }
 
 .fade-enter-from,
@@ -100,7 +100,7 @@ onMounted(() => {
 
 /* Additional smooth fade-in for content */
 .fade-in-content {
-    animation: fadeInContent 0.8s ease-in-out;
+    animation: fadeInContent 0.6s ease-in-out;
 }
 
 @keyframes fadeInContent {
