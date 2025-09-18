@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Card from "../components/FolderCard.vue";
+import FolderCard from "../components/FolderCard.vue";
 import MoreCard from "../components/MoreCard.vue";
 import { onMounted, ref } from "vue";
 import { state } from "@/config/msalConfig";
@@ -41,7 +41,7 @@ onMounted(() => {
             </div>
 
             <div id="content" class="w-full flex items-end gap-2">
-                <Card :id="latestCase['id']" :message="latestCase['procedure']"
+                <FolderCard :id="latestCase['id']" :message="latestCase['procedure']"
                     :duration="`${latestCase['duration']} hours`" :date="new Date(latestCase['starttime'])" />
                 <Router-Link to="/operations">
                     <MoreCard />

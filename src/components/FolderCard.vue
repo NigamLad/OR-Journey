@@ -49,6 +49,45 @@ onMounted(() => {
     max-width:250px;
     width: 100%;
     height: 130px;
+    position: relative;
+}
+
+#card::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 13px;
+    padding: 3px;
+    background: linear-gradient(135deg, 
+        #7A4E78 0%, 
+        rgba(122, 78, 120, 1) 25%, 
+        rgba(55, 110, 105, 0.9) 50%, 
+        rgba(55, 110, 105, 1) 75%, 
+        #4A7A75 100%
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    opacity: 0;
+    animation: gradientGlow 3s ease-in-out infinite;
+    filter: 
+        drop-shadow(0 0 5px rgba(122, 78, 120, 0.8)) 
+        drop-shadow(0 0 12px rgba(122, 78, 120, 0.6)) 
+        drop-shadow(0 0 20px rgba(122, 78, 120, 0.4))
+        drop-shadow(0 0 8px rgba(55, 110, 105, 0.8)) 
+        drop-shadow(0 0 16px rgba(55, 110, 105, 0.6)) 
+        drop-shadow(0 0 25px rgba(55, 110, 105, 0.4));
+}
+
+@keyframes gradientGlow {
+    0%, 100% {
+        opacity: 0;
+    }
+    
+    50% {
+        opacity: 1;
+    }
 }
 
 #tab {
